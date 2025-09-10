@@ -109,7 +109,7 @@ cargarTrabajos(force: boolean = false) {
       dia: this.diaSeleccionado,
       trabajos: this.trabajos
     };
-    this.http.post('http://localhost:3004/pro/partidos.json', payload).subscribe({
+    this.http.post('http://50.21.187.205:81/pro/partidos.json', payload).subscribe({
       next: () => alert('Datos guardados en servidor ✅'),
       error: (err) => console.error(err)
     });
