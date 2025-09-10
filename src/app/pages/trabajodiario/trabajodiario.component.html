@@ -1,0 +1,65 @@
+<h2>Trabajo del día: {{ diaSeleccionado | titlecase }}</h2>
+
+<label for="dia">Selecciona un día:</label>
+<select id="dia" (change)="cambiarDia($event)">
+  <option *ngFor="let d of diasDisponibles" [value]="d">{{ d | titlecase }}</option>
+</select>
+
+<div style="margin: 10px 0;">
+  <button (click)="mostrarArray()">Mostrar array en consola</button>
+  <button (click)="guardarEnServidor()">Guardar en servidor</button>
+  <button (click)="descargarJSON()">Descargar copia JSON</button>
+</div>
+
+<table border="1">
+  <thead>
+    <tr>
+      <th>Equipo 1</th>
+      <th>G1</th>
+      <th>G2</th>
+      <th>Equipo 2</th>
+      <th>Desempate</th>
+      <th>R</th>
+      <th>P</th>
+      <th>G</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let t of trabajos">
+      <td>{{ t.equipo1 }}</td>
+      <td *ngIf="!t.editando">{{ t.g1 ?? '-' }}</td>
+      <td *ngIf="t.editando"><input type="number" [(ngModel)]="t.g1" min="0"></td>
+
+      <td *ngIf="!t.editando">{{ t.g2 ?? '-' }}</td>
+      <td *ngIf="t.editando"><input type="number" [(ngModel)]="t.g2" min="0"></td>
+
+      <td>{{ t.equipo2 }}</td>
+
+      <td>
+        <span *ngIf="!t.editando">{{ t.desempate }}</span>
+        <select *ngIf="t.editando && t.g1 === t.g2" [(ngModel)]="t.desempate">
+          <option value="">Selecciona</option>
+          <option value="L">{{ t.equipo1 }} gana</option>
+          <option value="V">{{ t.equipo2 }} gana</option>
+        </select>
+      </td>
+
+      <td>
+        <button *ngIf="!t.editando" (click)="accion('R', t)">R</button>
+        <button *ngIf="t.editando" (click)="guardarGoles(t)">Guardar</button>
+      </td>
+      <td><button (click)="accion('P', t)">P</button></td>
+      <td><button (click)="accion('G', t)">G</button></td>
+    </tr>
+
+    <tr *ngIf="trabajos.length === 0">
+      <td colspan="8">No hay trabajo programado para este día.</td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+
+

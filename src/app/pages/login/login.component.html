@@ -1,0 +1,17 @@
+<div class="login-container">
+  <h2>Login</h2>
+  <form (ngSubmit)="login()">
+    <label>
+      Usuario:
+      <input type="text" [(ngModel)]="username" name="username" required />
+    </label>
+    <br />
+    <label>
+      Contraseña:
+      <input type="password" [(ngModel)]="password" name="password" required />
+    </label>
+    <br />
+    <button type="submit">Ingresar</button>
+  </form>
+  <p>{{ message }}</p>
+</div>
