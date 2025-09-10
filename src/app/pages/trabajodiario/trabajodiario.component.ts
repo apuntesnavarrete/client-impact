@@ -32,7 +32,7 @@ export class TrabajodiarioComponent implements OnInit {
   usuario: string = 'victor';
   trabajos: Partido[] = [];
 
-  private urlPartidos = 'http://localhost:3004/pro/partidos.json';
+  private urlPartidos = 'http://50.21.187.205:81/pro/partidos.json';
 
   constructor(private http: HttpClient) {
     const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
@@ -45,24 +45,30 @@ export class TrabajodiarioComponent implements OnInit {
     this.cargarTrabajos();
   }
 
-  cargarTrabajos() {
-    const guardado = localStorage.getItem(`trabajos-${this.diaSeleccionado}`);
-    if (guardado) {
-      this.trabajos = JSON.parse(guardado);
-    } else {
-      // Traer desde la URL
-      this.http.get<PartidosJSON>(this.urlPartidos).subscribe({
-        next: (data) => {
-          const partidosDia = data[this.diaSeleccionado] || [];
-          this.trabajos = partidosDia.map(p => ({ ...p, desempate: '', editando: false }));
-        },
-        error: (err) => {
-          console.error('Error al cargar partidos:', err);
-          this.trabajos = [];
-        }
-      });
-    }
+cargarTrabajos(force: boolean = false) {
+  const key = `trabajos-${this.diaSeleccionado}`;
+  const guardado = localStorage.getItem(key);
+
+  if (guardado && !force) {
+    // Usar cache local si no se fuerza fetch
+    this.trabajos = JSON.parse(guardado);
+  } else {
+    // Traer siempre del servidor
+    this.http.get<PartidosJSON>(this.urlPartidos).subscribe({
+      next: (data) => {
+        const partidosDia = data[this.diaSeleccionado] || [];
+        this.trabajos = partidosDia.map(p => ({ ...p, desempate: '', editando: false }));
+
+        // Guardar en localStorage para próximas visitas
+        localStorage.setItem(key, JSON.stringify(this.trabajos));
+      },
+      error: (err) => {
+        console.error('Error al cargar partidos:', err);
+        this.trabajos = [];
+      }
+    });
   }
+}
 
   cambiarDia(event: Event) {
     const valor = (event.target as HTMLSelectElement).value as DiasTrabajo;
@@ -125,23 +131,13 @@ export class TrabajodiarioComponent implements OnInit {
   }
 
 resetLocalStorage() {
-  localStorage.removeItem(`trabajos-${this.diaSeleccionado}`);
+  const key = `trabajos-${this.diaSeleccionado}`;
+  localStorage.removeItem(key);
+  this.cargarTrabajos(true);
+}
 
-  // Traer desde servidor (POST/GET) en lugar de archivo JSON original
-  this.http.get(`http://localhost:3004/pro/partidos.json`).subscribe({
-    next: (data: any) => {
-      const partidosDia = data[this.diaSeleccionado] || [];
-      this.trabajos = partidosDia.map((p: any) => ({
-        ...p,
-        desempate: p.desempate || '',
-        editando: false
-      }));
-    },
-    error: (err) => {
-      console.error('Error al cargar partidos:', err);
-      this.trabajos = [];
-    }
-  });
+actualizarDesdeServidor() {
+  this.cargarTrabajos(true); // fuerza fetch y sobreescribe localStorage
 }
 }
 
