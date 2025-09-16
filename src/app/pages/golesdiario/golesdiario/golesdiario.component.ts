@@ -39,7 +39,7 @@ mensaje: string = '';
   }
 
  cargarAsistencias() {
-  this.http.get<Asistencia[]>('http://localhost:3004/pro/planteles_asistencia.json')
+  this.http.get<Asistencia[]>('http://50.21.187.205:81/pro/planteles_asistencia.json')
     .subscribe({
       next: (data) => {
         this.asistencias = data.map(item => ({
@@ -59,7 +59,7 @@ mensaje: string = '';
 
 guardarGoles() {
   const datos = this.participantesFiltrados; // solo el equipo seleccionado
-  this.http.post('http://50.21.187.205:81//pro/planteles_goles.json', datos)
+  this.http.post('http://50.21.187.205:81/pro/planteles_goles.json', datos)
     .subscribe({
       next: res => {
         console.log('Guardado en backend:', res);

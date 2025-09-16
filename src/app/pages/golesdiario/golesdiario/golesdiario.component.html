@@ -11,9 +11,10 @@
   <form>
     <div *ngFor="let jugador of participantesFiltrados; let i = index" class="jugador-item">
       <label>
-        {{ jugador.name }} -
+        
         <input type="number" [(ngModel)]="jugador.goles" [name]="'goles' + i" placeholder="Goles" class="input-goles" />
-      </label>
+    {{ jugador.name }} 
+    </label>
     </div>
   </form>
 
