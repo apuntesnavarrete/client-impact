@@ -106,7 +106,7 @@ enviarAsistencia() {
 
   console.log('Asistencias a enviar:', asistenciaArray);
 
-  this.http.post('http://localhost:3004/pro/planteles_asistencia.json', asistenciaArray)
+  this.http.post('http://50.21.187.205:81//pro/planteles_asistencia.json', asistenciaArray)
     .subscribe({
       next: (res) => {
         console.log('Asistencia enviada correctamente:', res);
