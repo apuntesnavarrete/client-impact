@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Router } from '@angular/router'; // ✅ correcto
 
 type DiasTrabajo = 'jueves' | 'viernes';
 
@@ -34,7 +35,7 @@ export class TrabajodiarioComponent implements OnInit {
 
   private urlPartidos = 'http://50.21.187.205:81/pro/partidos.json';
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private router : Router) {
     const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
     const hoy = new Date();
     const diaHoy = dias[hoy.getDay()] as DiasTrabajo;
@@ -91,17 +92,27 @@ cargarTrabajos(force: boolean = false) {
     localStorage.setItem(`trabajos-${this.diaSeleccionado}`, JSON.stringify(this.trabajos));
   }
 
-  accion(tipo: string, partido: Partido) {
-    if (tipo === 'R') {
-      this.iniciarEdicion(partido);
-    } else {
-      console.log(`Botón ${tipo} presionado para:`, partido);
-    }
+ accion(tipo: string, partido: Partido) {
+  if (tipo === 'R') {
+    this.iniciarEdicion(partido);
+  } else {
+    console.log(`Botón ${tipo} presionado para:`, partido);
   }
 
-  mostrarArray() {
-    console.log('Array de trabajos:', this.trabajos);
+  if (tipo === 'P') {
+    // Navegar a planteles-diario con equipos en la URL
+    const equipos = [partido.equipo1, partido.equipo2].join(',');
+    this.router.navigate(['/planteles'], { queryParams: { team: equipos } });
+    return;
   }
+
+    if (tipo === 'G') {
+    // Navegar a planteles-diario con equipos en la URL
+    const equipos = [partido.equipo1, partido.equipo2].join(',');
+    this.router.navigate(['/Goles'], { queryParams: { team: equipos } });
+    return;
+  }
+}
 
   guardarEnServidor() {
     const payload = {

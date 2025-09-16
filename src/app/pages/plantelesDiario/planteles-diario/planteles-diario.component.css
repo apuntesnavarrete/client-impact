@@ -1,0 +1,74 @@
+.asistencia-container {
+  margin: 15px 0;
+  font-family: Arial, sans-serif;
+}
+
+.styled-select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.3s;
+}
+
+.styled-select:focus {
+  border-color: #007bff;
+}
+
+.asistencia-list {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+
+.jugador-item {
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.jugador-item.seleccionado {
+  text-decoration: line-through; /* 👈 línea en medio */
+  color: gray; /* opcional, para que se vea más claro */
+}
+
+.jugador-item input {
+  margin-right: 10px;
+}
+
+.btn-enviar {
+  margin-top: 15px;
+  padding: 10px 18px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-enviar:hover {
+  background-color: #0056b3;
+}
+
+.contador {
+  margin-top: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+}
+
+.mensaje-feedback {
+  margin-top: 10px;
+  font-weight: bold;
+  color: green; /* por defecto éxito */
+}
+
+.mensaje-feedback:contains("❌") {
+  color: red; /* error */
+}

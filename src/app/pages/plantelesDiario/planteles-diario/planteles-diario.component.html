@@ -1,0 +1,43 @@
+<div *ngIf="planteles && plantelesKeys.length > 0" class="asistencia-container">
+  <label for="teamSelect">Selecciona equipo:</label>
+  <select id="teamSelect" [(ngModel)]="selectedTeam" class="styled-select">
+    <option *ngFor="let team of plantelesKeys" [value]="team">
+      {{ team }}
+    </option>
+  </select>
+</div>
+
+<div *ngIf="selectedTeam" class="asistencia-list">
+  <h3>{{ selectedTeam }}</h3>
+
+  <ul>
+    <li
+      *ngFor="let jugador of planteles[selectedTeam] || []; trackBy: trackByJugador"
+      [class.seleccionado]="jugador.asistencia"
+      class="jugador-item"
+    >
+      <label>
+        <input
+          type="checkbox"
+          [(ngModel)]="jugador.asistencia"
+        />
+        {{ jugador.name }}
+      </label>
+    </li>
+  </ul>
+
+  <!-- 👇 Conteo -->
+ <p class="contador" *ngIf="selectedTeam">
+  Seleccionados: {{ getSeleccionados() }} / {{ getTotal() }}
+</p>
+
+  <button class="btn-enviar" (click)="enviarAsistencia()">Enviar asistencia</button>
+</div>
+
+<p *ngIf="mensaje" class="mensaje-feedback">{{ mensaje }}</p>
+
+
+
+
+
+

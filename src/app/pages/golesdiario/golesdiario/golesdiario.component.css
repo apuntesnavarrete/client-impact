@@ -1,0 +1,78 @@
+/* Contenedor del select */
+.team-selector {
+  margin: 15px 0;
+  font-family: Arial, sans-serif;
+}
+
+.styled-select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.3s;
+}
+
+.styled-select:focus {
+  border-color: #007bff;
+}
+
+/* Contenedor de jugadores */
+.jugadores-container {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+
+/* Cada jugador */
+.jugador-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+/* Input de goles */
+.input-goles {
+  width: 60px;
+  margin-left: 5px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* Botón */
+.btn-guardar {
+  margin-top: 15px;
+  padding: 10px 18px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-guardar:hover {
+  background-color: #0056b3;
+}
+
+
+.total-goles {
+  font-weight: bold;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.mensaje-feedback {
+  margin-top: 8px;
+  font-weight: bold;
+  color: green;
+}
+
+.mensaje-feedback:contains("❌") {
+  color: red;
+}

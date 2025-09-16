@@ -1,0 +1,26 @@
+<div class="team-selector">
+  <label for="teamSelect">Selecciona un equipo:</label>
+<select id="teamSelect" [(ngModel)]="selectedTeam" (change)="cargarAsistencias()" class="styled-select">
+  <option *ngFor="let team of teamsFromUrl" [value]="team">{{ team }}</option>
+</select>
+</div>
+
+<div *ngIf="selectedTeam" class="jugadores-container">
+  <h3>Jugadores de {{ selectedTeam }}</h3>
+
+  <form>
+    <div *ngFor="let jugador of participantesFiltrados; let i = index" class="jugador-item">
+      <label>
+        {{ jugador.name }} -
+        <input type="number" [(ngModel)]="jugador.goles" [name]="'goles' + i" placeholder="Goles" class="input-goles" />
+      </label>
+    </div>
+  </form>
+
+  <p class="total-goles">Total goles: {{ totalGoles }}</p>
+
+  <button type="button" class="btn-guardar" (click)="guardarGoles()">Guardar goles</button>
+
+  <p *ngIf="mensaje" class="mensaje-feedback">{{ mensaje }}</p>
+</div>
+

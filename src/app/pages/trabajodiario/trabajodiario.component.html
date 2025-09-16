@@ -2,11 +2,15 @@
 
 <label for="dia">Selecciona un día:</label>
 <select id="dia" (change)="cambiarDia($event)">
-  <option *ngFor="let d of diasDisponibles" [value]="d">{{ d | titlecase }}</option>
+  <!-- Opción vacía -->
+  <option value="" disabled selected>-- Selecciona un día --</option>
+
+  <option *ngFor="let d of diasDisponibles" [value]="d">
+    {{ d | titlecase }}
+  </option>
 </select>
 
 <div style="margin: 10px 0;">
-  <button (click)="mostrarArray()">Mostrar array en consola</button>
   <button (click)="guardarEnServidor()">Guardar en servidor</button>
   <button (click)="descargarJSON()">Descargar copia JSON</button>
 </div>
