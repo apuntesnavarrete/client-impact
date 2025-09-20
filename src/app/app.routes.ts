@@ -4,11 +4,13 @@ import { TrabajodiarioComponent } from './pages/trabajodiario/trabajodiario.comp
 import { authGuard } from './auth/guard.guard';
 import { PlantelesDiarioComponent } from './pages/plantelesDiario/planteles-diario/planteles-diario.component';
 import { GolesdiarioComponent } from './pages/golesdiario/golesdiario/golesdiario.component';
+import { AdminComponent } from './admin/admin/admin.component';
 
 export const routes: Routes = [
   { path: '', component: LoginComponent },
     { path: 'trabajo', component: TrabajodiarioComponent, canActivate: [authGuard] },
     { path: 'planteles', component: PlantelesDiarioComponent},
-    { path: 'Goles', component: GolesdiarioComponent}
+    { path: 'Goles', component: GolesdiarioComponent},
+    { path: 'Admin', component: AdminComponent}
 
 ];

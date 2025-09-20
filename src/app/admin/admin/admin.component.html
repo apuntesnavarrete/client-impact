@@ -1,0 +1,31 @@
+<div class="p-4">
+  <label>Día de la semana:</label>
+  <input type="text" [(ngModel)]="dia" class="border p-1 mb-2" />
+
+  <div *ngFor="let v of versus; let i = index" class="mb-2">
+    <select [(ngModel)]="v.equipo1" class="border p-1 mr-2">
+      <option value="">-- Equipo 1 --</option>
+      <option *ngFor="let t of teams" [value]="t.name">{{ t.name }}</option>
+    </select>
+
+    <span>vs</span>
+
+    <select [(ngModel)]="v.equipo2" class="border p-1 ml-2">
+      <option value="">-- Equipo 2 --</option>
+      <option *ngFor="let t of teams" [value]="t.name">{{ t.name }}</option>
+    </select>
+  </div>
+
+  <button (click)="addVersus()" class="bg-blue-500 text-white px-2 py-1 mr-2">
+    + Agregar
+  </button>
+
+  <button (click)="submit()" class="bg-green-500 text-white px-2 py-1 mr-2">
+    Guardar / Descargar
+  </button>
+
+  <!-- 👉 Botón para descargar directamente lo del endpoint -->
+  <button (click)="downloadFromApi()" class="bg-purple-600 text-white px-2 py-1">
+    Descargar Roster
+  </button>
+</div>
