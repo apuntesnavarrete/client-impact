@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router'; // ✅ correcto
+import { AuthService } from '../../service/auth/auth.service';
 
 type DiasTrabajo = 'jueves' | 'viernes' | 'miercoles';
 
@@ -36,7 +37,10 @@ export class TrabajodiarioComponent implements OnInit {
 
   private urlPartidos = 'http://50.21.187.205:81/pro/partidos.json';
 
-  constructor(private http: HttpClient, private router : Router) {
+  constructor(private http: HttpClient
+    , private router : Router
+    ,public auth: AuthService
+  ) {
     const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
     const hoy = new Date();
     const diaHoy = dias[hoy.getDay()] as DiasTrabajo;
