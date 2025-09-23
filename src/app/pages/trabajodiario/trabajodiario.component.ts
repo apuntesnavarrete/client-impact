@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router'; // ✅ correcto
 
-type DiasTrabajo = 'jueves' | 'viernes';
+type DiasTrabajo = 'jueves' | 'viernes' | 'miercoles';
 
 interface Partido {
   equipo1: string;
@@ -18,6 +18,7 @@ interface Partido {
 interface PartidosJSON {
   jueves: Partido[];
   viernes: Partido[];
+  miercoles: Partido[]
 }
 
 @Component({
@@ -28,7 +29,7 @@ interface PartidosJSON {
   styleUrls: ['./trabajodiario.component.css']
 })
 export class TrabajodiarioComponent implements OnInit {
-  diasDisponibles: DiasTrabajo[] = ['jueves', 'viernes'];
+  diasDisponibles: DiasTrabajo[] = ['jueves', 'viernes', 'miercoles'];
   diaSeleccionado: DiasTrabajo;
   usuario: string = 'victor';
   trabajos: Partido[] = [];
@@ -58,7 +59,7 @@ cargarTrabajos(force: boolean = false) {
     this.http.get<PartidosJSON>(this.urlPartidos).subscribe({
       next: (data) => {
         const partidosDia = data[this.diaSeleccionado] || [];
-        this.trabajos = partidosDia.map(p => ({ ...p, desempate: '', editando: false }));
+        this.trabajos = partidosDia.map((p: any) => ({ ...p, desempate: '', editando: false }));
 
         // Guardar en localStorage para próximas visitas
         localStorage.setItem(key, JSON.stringify(this.trabajos));
