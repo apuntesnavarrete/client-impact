@@ -1,3 +1,11 @@
+  <div *ngIf="auth.getUser()?.username === 'vic123'">
+      Bienvenido administrador {{ auth.getUser()?.username }}
+    </div>
+
+    <div *ngIf="auth.getUser()?.username === 'zon'">
+      Bienvenido jugador {{ auth.getUser()?.username }}
+    </div>
+
 <h2>Trabajo del día: {{ diaSeleccionado | titlecase }}</h2>
 
 <label for="dia">Selecciona un día:</label>
@@ -40,8 +48,10 @@
       <td>{{ t.equipo2 }}</td>
 
       <td>
-        <span *ngIf="!t.editando">{{ t.desempate }}</span>
-        <select *ngIf="t.editando && t.g1 === t.g2" [(ngModel)]="t.desempate">
+  <span *ngIf="!t.editando">
+          {{ t.desempate === 'L' ? t.equipo1 + ' gana' :
+             t.desempate === 'V' ? t.equipo2 + ' gana' : '-' }}
+        </span>        <select *ngIf="t.editando && t.g1 === t.g2" [(ngModel)]="t.desempate">
           <option value="">Selecciona</option>
           <option value="L">{{ t.equipo1 }} gana</option>
           <option value="V">{{ t.equipo2 }} gana</option>
@@ -62,19 +72,15 @@
   </tbody>
 </table>
 
+<h3>Descripción de los botones</h3>
+<ul>
+  <li><strong>R</strong> → resultados (editar goles del partido)</li>
+  <li><strong>P</strong> → agregar planteles (ver planteles del partido)</li>
+  <li><strong>G</strong> → agregar goles (ver o agregar detalles de goles)</li>
+</ul>
 
 
 
 
-<button (click)="actualizarDesdeServidor()">
-  🔄 Actualizar desde servidor
-</button>
 
 
-  <div *ngIf="auth.getUser()?.username === 'vic123'">
-      Bienvenido administrador {{ auth.getUser()?.username }}
-    </div>
-
-    <div *ngIf="auth.getUser()?.username === 'zon'">
-      Bienvenido jugador {{ auth.getUser()?.username }}
-    </div>

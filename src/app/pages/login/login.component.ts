@@ -19,11 +19,11 @@ export class LoginComponent {
 
   // Usuario y hash SHA-256 de la contraseña
  private readonly users = [
-  {
-    username: 'vic',
-    passwordHash: '755a55f7c344c181b8b7deee84146265cc0800cf7b14b30a73db623ede16afa5',
-    role: 'admin'
-  },
+ {
+  username: 'vic',
+  passwordHash: '07a24954ade82eae92abbb40fc522955e0df693d6051a707b58f795bf4f5d5cc',
+  role: 'admin'
+},
   {
     username: 'zon',
     passwordHash: '69186c5f798ab56f3bfbff4c9128b66610b86852146303607243ebc3a2bb68d8',
@@ -35,8 +35,6 @@ export class LoginComponent {
 
 login() {
   const hash = this.hashPassword(this.password);
-console.log(hash)
-console.log(this.hashPassword)
 
   const user = this.users.find(
     u => u.username === this.username && u.passwordHash === hash
@@ -45,7 +43,6 @@ console.log(this.hashPassword)
   if (user) {
     this.auth.login(user);  // ✅ pasas el usuario encontrado
     this.router.navigate(['/trabajo']);
-    console.log(user)
   } else {
     this.message = '❌ Usuario o contraseña incorrectos';
   }

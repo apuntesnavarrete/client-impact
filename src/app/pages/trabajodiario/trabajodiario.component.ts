@@ -2,9 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { Router } from '@angular/router'; // ✅ correcto
+import { Router } from '@angular/router';
 import { AuthService } from '../../service/auth/auth.service';
-
 
 interface Partido {
   equipo1: string;
@@ -15,8 +14,6 @@ interface Partido {
   editando?: boolean;
 }
 
-
-
 @Component({
   selector: 'app-trabajo-diario',
   standalone: true,
@@ -26,29 +23,28 @@ interface Partido {
 })
 export class TrabajodiarioComponent implements OnInit {
   diasDisponibles: any[] = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
-
   diaSeleccionado: any;
   usuario: string;
   trabajos: Partido[] = [];
+  private urlPartidos: string;
 
-private urlPartidos: string;
+  constructor(
+  private http: HttpClient,
+  private router: Router,
+  public auth: AuthService
+) {
+  // Días disponibles sin tildes para que coincida con el select
+  this.diasDisponibles = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
 
+  // Día de hoy por defecto
+  const hoy = new Date();
+  this.diaSeleccionado = this.diasDisponibles[hoy.getDay()];
 
-
-  constructor(private http: HttpClient
-    , private router : Router
-    ,public auth: AuthService
-  ) {
-    const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-    const hoy = new Date();
-    const diaHoy = dias[hoy.getDay()] as any;
-    this.diaSeleccionado = diaHoy;
-
-    // Obtener usuario dinámicamente
+  // Usuario dinámico
   const user = this.auth.getUser();
   this.usuario = user ? user.username : 'invitado';
 
-   // URL dinámica según usuario
+  // URL dinámica según usuario
   if (this.usuario === 'vic') {
     this.urlPartidos = 'http://50.21.187.205:81/pro/partidos.json';
   } else if (this.usuario === 'zon') {
@@ -56,32 +52,21 @@ private urlPartidos: string;
   } else {
     this.urlPartidos = 'http://50.21.187.205:81/default/partidos.json';
   }
+}
 
-  }
+ngOnInit() {
+  this.cargarTrabajos(); // carga automáticamente el día de hoy
+}
 
-  ngOnInit() {
-    this.cargarTrabajos();
-  }
-
-cargarTrabajos(force: boolean = false) {
-  const key = `trabajos-${this.diaSeleccionado}`;
-  const guardado = localStorage.getItem(key);
-
-  if (guardado && !force) {
-    // Usar cache local si no se fuerza fetch
-    this.trabajos = JSON.parse(guardado);
-  } else {
-    console.log(this.urlPartidos)
-        console.log(this.usuario)
-
-    // Traer siempre del servidor
+  cargarTrabajos() {
     this.http.get<any>(this.urlPartidos).subscribe({
       next: (data) => {
         const partidosDia = data[this.diaSeleccionado] || [];
-        this.trabajos = partidosDia.map((p: any) => ({ ...p, desempate: '', editando: false }));
-
-        // Guardar en localStorage para próximas visitas
-        localStorage.setItem(key, JSON.stringify(this.trabajos));
+        this.trabajos = partidosDia.map((p: any) => ({
+          ...p,
+          desempate: p.desempate ?? '', // ✅ conserva "L" o "V" del JSON
+          editando: false
+        }));
       },
       error: (err) => {
         console.error('Error al cargar partidos:', err);
@@ -89,7 +74,28 @@ cargarTrabajos(force: boolean = false) {
       }
     });
   }
-}
+
+  guardarGoles(partido: Partido) {
+    if (partido.g1 === partido.g2 && !partido.desempate) {
+      alert('Hay empate, selecciona quién gana el desempate (L o V).');
+      return;
+    } else if (partido.g1 !== partido.g2) {
+      partido.desempate = '';
+    }
+    partido.editando = false;
+
+    // ✅ Actualiza TODO el día en el mismo endpoint que el botón guardar
+    const payload = {
+      usuario: this.usuario,
+      dia: this.diaSeleccionado,
+      trabajos: this.trabajos
+    };
+
+    this.http.post(this.urlPartidos, payload).subscribe({
+      next: () => console.log('Datos del día actualizados en servidor ✅'),
+      error: (err) => console.error('Error al guardar en servidor:', err)
+    });
+  }
 
   cambiarDia(event: Event) {
     const valor = (event.target as HTMLSelectElement).value as any;
@@ -101,38 +107,19 @@ cargarTrabajos(force: boolean = false) {
     partido.editando = true;
   }
 
-  guardarGoles(partido: Partido) {
-    if (partido.g1 === partido.g2 && !partido.desempate) {
-      alert('Hay empate, selecciona quién gana el desempate (L o V).');
-      return;
-    } else if (partido.g1 !== partido.g2) {
-      partido.desempate = '';
+  accion(tipo: string, partido: Partido) {
+    if (tipo === 'R') this.iniciarEdicion(partido);
+
+    if (tipo === 'P') {
+      const equipos = [partido.equipo1, partido.equipo2].join(',');
+      this.router.navigate(['/planteles'], { queryParams: { team: equipos } });
     }
-    partido.editando = false;
-    localStorage.setItem(`trabajos-${this.diaSeleccionado}`, JSON.stringify(this.trabajos));
-  }
-
- accion(tipo: string, partido: Partido) {
-  if (tipo === 'R') {
-    this.iniciarEdicion(partido);
-  } else {
-    console.log(`Botón ${tipo} presionado para:`, partido);
-  }
-
-  if (tipo === 'P') {
-    // Navegar a planteles-diario con equipos en la URL
-    const equipos = [partido.equipo1, partido.equipo2].join(',');
-    this.router.navigate(['/planteles'], { queryParams: { team: equipos } });
-    return;
-  }
 
     if (tipo === 'G') {
-    // Navegar a planteles-diario con equipos en la URL
-    const equipos = [partido.equipo1, partido.equipo2].join(',');
-    this.router.navigate(['/Goles'], { queryParams: { team: equipos } });
-    return;
+      const equipos = [partido.equipo1, partido.equipo2].join(',');
+      this.router.navigate(['/Goles'], { queryParams: { team: equipos } });
+    }
   }
-}
 
   guardarEnServidor() {
     const payload = {
@@ -140,7 +127,7 @@ cargarTrabajos(force: boolean = false) {
       dia: this.diaSeleccionado,
       trabajos: this.trabajos
     };
-    this.http.post('http://50.21.187.205:81/pro/partidos.json', payload).subscribe({
+    this.http.post(this.urlPartidos, payload).subscribe({
       next: () => alert('Datos guardados en servidor ✅'),
       error: (err) => console.error(err)
     });
@@ -160,17 +147,8 @@ cargarTrabajos(force: boolean = false) {
     a.click();
     URL.revokeObjectURL(url);
   }
-
-resetLocalStorage() {
-  const key = `trabajos-${this.diaSeleccionado}`;
-  localStorage.removeItem(key);
-  this.cargarTrabajos(true);
 }
 
-actualizarDesdeServidor() {
-  this.cargarTrabajos(true); // fuerza fetch y sobreescribe localStorage
-}
-}
 
 
 
