@@ -5,7 +5,6 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router'; // ✅ correcto
 import { AuthService } from '../../service/auth/auth.service';
 
-type DiasTrabajo = 'jueves' | 'viernes' | 'miercoles';
 
 interface Partido {
   equipo1: string;
@@ -16,11 +15,7 @@ interface Partido {
   editando?: boolean;
 }
 
-interface PartidosJSON {
-  jueves: Partido[];
-  viernes: Partido[];
-  miercoles: Partido[]
-}
+
 
 @Component({
   selector: 'app-trabajo-diario',
@@ -30,12 +25,15 @@ interface PartidosJSON {
   styleUrls: ['./trabajodiario.component.css']
 })
 export class TrabajodiarioComponent implements OnInit {
-  diasDisponibles: DiasTrabajo[] = ['jueves', 'viernes', 'miercoles'];
-  diaSeleccionado: DiasTrabajo;
-  usuario: string = 'victor';
+  diasDisponibles: any[] = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+
+  diaSeleccionado: any;
+  usuario: string;
   trabajos: Partido[] = [];
 
-  private urlPartidos = 'http://50.21.187.205:81/pro/partidos.json';
+private urlPartidos: string;
+
+
 
   constructor(private http: HttpClient
     , private router : Router
@@ -43,8 +41,22 @@ export class TrabajodiarioComponent implements OnInit {
   ) {
     const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
     const hoy = new Date();
-    const diaHoy = dias[hoy.getDay()] as DiasTrabajo;
+    const diaHoy = dias[hoy.getDay()] as any;
     this.diaSeleccionado = diaHoy;
+
+    // Obtener usuario dinámicamente
+  const user = this.auth.getUser();
+  this.usuario = user ? user.username : 'invitado';
+
+   // URL dinámica según usuario
+  if (this.usuario === 'vic') {
+    this.urlPartidos = 'http://50.21.187.205:81/pro/partidos.json';
+  } else if (this.usuario === 'zon') {
+    this.urlPartidos = 'http://50.21.187.205:81/ed/partidos.json';
+  } else {
+    this.urlPartidos = 'http://50.21.187.205:81/default/partidos.json';
+  }
+
   }
 
   ngOnInit() {
@@ -59,8 +71,11 @@ cargarTrabajos(force: boolean = false) {
     // Usar cache local si no se fuerza fetch
     this.trabajos = JSON.parse(guardado);
   } else {
+    console.log(this.urlPartidos)
+        console.log(this.usuario)
+
     // Traer siempre del servidor
-    this.http.get<PartidosJSON>(this.urlPartidos).subscribe({
+    this.http.get<any>(this.urlPartidos).subscribe({
       next: (data) => {
         const partidosDia = data[this.diaSeleccionado] || [];
         this.trabajos = partidosDia.map((p: any) => ({ ...p, desempate: '', editando: false }));
@@ -77,7 +92,7 @@ cargarTrabajos(force: boolean = false) {
 }
 
   cambiarDia(event: Event) {
-    const valor = (event.target as HTMLSelectElement).value as DiasTrabajo;
+    const valor = (event.target as HTMLSelectElement).value as any;
     this.diaSeleccionado = valor;
     this.cargarTrabajos();
   }

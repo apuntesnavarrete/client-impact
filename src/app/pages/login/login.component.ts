@@ -20,7 +20,7 @@ export class LoginComponent {
   // Usuario y hash SHA-256 de la contraseña
  private readonly users = [
   {
-    username: 'vic123',
+    username: 'vic',
     passwordHash: '755a55f7c344c181b8b7deee84146265cc0800cf7b14b30a73db623ede16afa5',
     role: 'admin'
   },
