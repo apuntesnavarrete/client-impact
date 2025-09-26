@@ -40,6 +40,16 @@
 
 <p *ngIf="mensaje" class="mensaje-feedback">{{ mensaje }}</p>
 
+<div *ngIf="selectedTeam" class="nuevo-jugador">
+  <h4>Agregar nuevo jugador a {{ selectedTeam }}</h4>
+  <input
+    type="text"
+    [(ngModel)]="nuevoJugadorNombre"
+    placeholder="Nombre del jugador"
+    class="input-nuevo-jugador"
+  />
+  <button class="btn-agregar" (click)="agregarNuevoJugador()">Agregar y enviar</button>
+</div>
 
 
 

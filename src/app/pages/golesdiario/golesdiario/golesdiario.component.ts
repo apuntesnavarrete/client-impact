@@ -86,6 +86,30 @@ const datos = this.participantesFiltrados.map(j => ({
 get totalGoles(): number {
   return this.participantesFiltrados.reduce((sum, j) => sum + (j.goles || 0), 0);
 }
+
+cambiarAsistencia(jugador: Asistencia) {
+  jugador.asistencia = !jugador.asistencia; // cambia true a false o false a true
+
+  // Opcional: enviar cambio al backend inmediatamente
+  if (this.partidoId !== null) {
+    this.http.post('http://50.21.187.205:81/pro/planteles_asistencia.json', [{
+      ...jugador,
+      asistencia: jugador.asistencia,
+      partidoId: this.partidoId
+    }]).subscribe({
+      next: res => {
+        console.log('Asistencia actualizada:', res);
+        this.mensaje = `✅ Asistencia de "${jugador.name}" actualizada a ${jugador.asistencia}.`;
+        setTimeout(() => this.mensaje = '', 3000);
+      },
+      error: err => {
+        console.error('Error al actualizar asistencia:', err);
+        this.mensaje = '❌ Error al actualizar asistencia.';
+      }
+    });
+  }
+}
+
 }
 
 

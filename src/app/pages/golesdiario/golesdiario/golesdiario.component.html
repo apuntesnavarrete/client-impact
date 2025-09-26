@@ -15,6 +15,18 @@
         <input type="number" [(ngModel)]="jugador.goles" [name]="'goles' + i" placeholder="Goles" class="input-goles" />
     {{ jugador.name }} 
     </label>
+
+  <button 
+    type="button" 
+    (click)="cambiarAsistencia(jugador)"
+    [style.backgroundColor]="'red'"
+    [style.color]="'white'"
+    class="btn-asistencia"
+  >
+    {{ jugador.asistencia ? 'Asistencia: ✅' : 'Asistencia: ❌' }}
+  </button>
+
+
     </div>
   </form>
 

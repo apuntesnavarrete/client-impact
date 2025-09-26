@@ -143,5 +143,48 @@ getTotal(): number {
   if (!this.selectedTeam) return 0;
   return this.planteles?.[this.selectedTeam]?.length || 0;
 }
+
+
+// Para nuevos jugadores
+nuevoJugadorNombre: string = '';
+
+agregarNuevoJugador() {
+  if (!this.selectedTeam || !this.nuevoJugadorNombre.trim() || this.partidoId === null) return;
+
+  const equipoId = this.planteles[this.selectedTeam][0]?.teamId || 0; // Tomamos el teamId de un jugador existente si hay
+
+  const nuevoJugador: Jugador = {
+    name: this.nuevoJugadorNombre.trim(),
+    asistencia: true, // asistencia siempre true
+    participantId: Date.now(), // generar un id temporal único
+    teamId: equipoId,
+  };
+
+  // Agregamos al arreglo local
+  this.planteles[this.selectedTeam].push(nuevoJugador);
+
+  // Enviar directamente al backend
+  this.http.post('http://50.21.187.205:81/pro/planteles_asistencia.json', [{
+    teamId: nuevoJugador.teamId,
+    teamName: this.selectedTeam,
+    participantId: nuevoJugador.participantId,
+    name: nuevoJugador.name,
+    dorsal: nuevoJugador.dorsal,
+    asistencia: true,
+    partidoId: this.partidoId
+  }]).subscribe({
+    next: (res) => {
+      console.log('Nuevo jugador enviado:', res);
+      this.mensaje = `✅ Nuevo jugador "${nuevoJugador.name}" agregado y asistencia enviada.`;
+      setTimeout(() => this.mensaje = '', 10000);
+      this.nuevoJugadorNombre = ''; // limpiar input
+    },
+    error: (err) => {
+      console.error('Error al enviar nuevo jugador:', err);
+      this.mensaje = '❌ Error al agregar nuevo jugador.';
+    }
+  });
+}
+
 }
 
