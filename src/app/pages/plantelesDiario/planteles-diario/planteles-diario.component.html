@@ -1,3 +1,7 @@
+<div *ngIf="partidoId !== null">
+  <p>Partido ID: {{ partidoId }}</p>
+</div>
+
 <div *ngIf="planteles && plantelesKeys.length > 0" class="asistencia-container">
   <label for="teamSelect">Selecciona equipo:</label>
   <select id="teamSelect" [(ngModel)]="selectedTeam" class="styled-select">

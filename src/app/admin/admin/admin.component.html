@@ -1,6 +1,20 @@
 <div class="p-4">
   <label>Día de la semana:</label>
-  <input type="text" [(ngModel)]="dia" class="border p-1 mb-2" />
+<select [(ngModel)]="dia">
+  <option *ngFor="let d of diasDisponibles" [value]="d">{{ d }}</option>
+</select>
+
+<label>Liga: </label>
+<select [(ngModel)]="ligaSeleccionada">
+  <option *ngFor="let l of ligasDisponibles" [value]="l.id">{{ l.nombre }}</option>
+</select>
+
+<!-- Select de categoría -->
+<label>Categoría: </label>
+<select [(ngModel)]="categoriaSeleccionada">
+  <option *ngFor="let c of categoriasDisponibles" [value]="c.id">{{ c.nombre }}</option>
+</select>
+
 
   <div *ngFor="let v of versus; let i = index" class="mb-2">
     <select [(ngModel)]="v.equipo1" class="border p-1 mr-2">

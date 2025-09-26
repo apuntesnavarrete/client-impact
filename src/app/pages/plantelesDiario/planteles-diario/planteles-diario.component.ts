@@ -38,6 +38,7 @@ export class PlantelesDiarioComponent implements OnInit {
   planteles: Record<string, Jugador[]> = {}; // Map: equipo -> jugadores
   selectedTeam: string | null = null;
 mensaje: string = ''; // 👈 nuevo
+  partidoId: number | null = null; // 👈 nueva variable para el id
 
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
@@ -46,6 +47,9 @@ mensaje: string = ''; // 👈 nuevo
   ngOnInit() {
     const teamsParam = this.route.snapshot.queryParamMap.get('team');
     const teamsFromUrl = teamsParam ? teamsParam.split(',') : [];
+
+ const idParam = this.route.snapshot.queryParamMap.get('id');
+    this.partidoId = idParam ? Number(idParam) : null;
 
     console.log('Equipos desde la URL:', teamsFromUrl);
     this.cargarPlanteles(teamsFromUrl);
@@ -102,6 +106,7 @@ enviarAsistencia() {
       name: jugador.name,
       dorsal: jugador.dorsal,
       asistencia: jugador.asistencia,
+      partidoId: this.partidoId // 🔹 agregamos el id del partido
     }));
 
   console.log('Asistencias a enviar:', asistenciaArray);
@@ -112,7 +117,7 @@ enviarAsistencia() {
         console.log('Asistencia enviada correctamente:', res);
         this.mensaje = `✅ Asistencia enviada correctamente para ${asistenciaArray.length} jugador(es).`;
         
-        // Limpiar el mensaje después de 3 segundos
+        // Limpiar el mensaje después de 10 segundos
         setTimeout(() => this.mensaje = '', 10000);
       },
       error: (err) => {
@@ -121,6 +126,7 @@ enviarAsistencia() {
       }
     });
 }
+
 
   trackByJugador(index: number, jugador: Jugador) {
     return jugador.participantId;
