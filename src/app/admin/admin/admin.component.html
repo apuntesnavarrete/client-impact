@@ -1,19 +1,15 @@
+
+<select [(ngModel)]="selectedTournamentId" (change)="loadTeams()">
+  <option *ngFor="let torneo of torneos" [value]="torneo.id">{{ torneo.nombre }}</option>
+</select>
+
 <div class="p-4">
   <label>Día de la semana:</label>
 <select [(ngModel)]="dia">
   <option *ngFor="let d of diasDisponibles" [value]="d">{{ d }}</option>
 </select>
 
-<label>Liga: </label>
-<select [(ngModel)]="ligaSeleccionada">
-  <option *ngFor="let l of ligasDisponibles" [value]="l.id">{{ l.nombre }}</option>
-</select>
 
-<!-- Select de categoría -->
-<label>Categoría: </label>
-<select [(ngModel)]="categoriaSeleccionada">
-  <option *ngFor="let c of categoriasDisponibles" [value]="c.id">{{ c.nombre }}</option>
-</select>
 
 
   <div *ngFor="let v of versus; let i = index" class="mb-2">
@@ -43,3 +39,33 @@
     Descargar Roster
   </button>
 </div>
+
+
+<h2>Lista de Partidos</h2>
+
+<table border="1" cellpadding="5" cellspacing="0">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Equipo 1</th>
+      <th>Equipo 2</th>
+      <th>Goles</th>
+      <th>Día</th>
+      <th>Torneo</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let partido of partidos">
+      <td>{{ partido.id }}</td>
+      <td>{{ partido.equipo1 }}</td>
+      <td>{{ partido.equipo2 }}</td>
+      <td>{{ partido.g1 ?? '-' }} : {{ partido.g2 ?? '-' }}</td>
+      <td>{{ partido.dia }}</td>
+      <td>{{ partido.torneoId }}</td>
+      <td>
+        <button (click)="deletePartido(partido.id)">🗑️ Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

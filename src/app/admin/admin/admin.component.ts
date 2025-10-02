@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Console } from 'console';
+import { getUrl } from '../../config';
 
 interface Team {
   id: number;
@@ -10,16 +10,16 @@ interface Team {
   logo: string;
 }
 
-
 interface Versus {
-  id: number;       // numérico ahora
+  id: number;       
   equipo1: string;
   equipo2: string;
+  g1?: number;
+  g2?: number;
   desempate: string;
   editando: boolean;
-  liga: number;
-  categoria: number;
   dia: string;
+  torneoId: number;
 }
 
 @Component({
@@ -30,30 +30,40 @@ interface Versus {
 })
 export class AdminComponent implements OnInit {
   teams: Team[] = [];
-   diasDisponibles = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
- 
-   ligasDisponibles = [
-    { id: 1, nombre: 'PRO' },
-    { id: 2, nombre: 'ED' }
+  diasDisponibles = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+  dia = '';
+
+  versus: Versus[] = [];   // partidos en edición (frontend)
+  partidos: Versus[] = []; // partidos cargados desde backend
+
+  // Opciones de torneo
+  torneos = [
+    { id: 44, nombre: "ED-MIXTA_DOMINICAL-24C" },
+    { id: 43, nombre: "PRO-LIBRE_GOLDEN-25C" },
+    { id: 39, nombre: "PRO-MIXTA-24C" },
+    { id: 42, nombre: "ED-MIXTA_SABATINA-25C" },
+    { id: 41, nombre: "ED-LIBRE-25A" },
+    { id: 40, nombre: "ED-LIBRE_SABATINA-25C" },
+    { id: 38, nombre: "ED-SUB23-25C" },
+    { id: 28, nombre: "ED-FEMENIL_DOMINICAL-25A" }
   ];
-  categoriasDisponibles = [
-    { id: 6, nombre: 'Libre' },
-    { id: 11, nombre: 'Mixta' }
-  ];
-   ligaSeleccionada: number = 1;
-  categoriaSeleccionada: number = 6;
-   dia = '';
-  versus: Versus[] = [];
+
+  selectedTournamentId = 43; // valor inicial
+  baseUrl = getUrl();
+  url = this.baseUrl + 'partidos';
 
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
+    this.loadTeams();
+    this.loadPartidos();
+  }
+
+  loadTeams() {
+    const tournamentId = this.selectedTournamentId;
     this.http
-      .get<any[]>('http://192.168.0.19:8080/api/v1/teams-tournament/tournament/43')
+      .get<any[]>(`http://192.168.0.19:8080/api/v1/teams-tournament/tournament/${tournamentId}`)
       .subscribe(data => {
-
-        console.log(data)
-
         this.teams = data.map(item => ({
           id: item.teams?.id,
           name: item.teams?.name,
@@ -62,38 +72,37 @@ export class AdminComponent implements OnInit {
       });
   }
 
-  /** 👉 Agregar partido con ID único */
+  /** 👉 Agregar partido con ID temporal */
   addVersus() {
     const id = this.versus.length + 1;
-
-    // Si quieres formato largo (Miercoles-1)
-
-    // O si quieres formato corto (M1, M2, etc.)
-    // const firstLetter = this.dia.charAt(0).toUpperCase();
-    // const id = `${firstLetter}${count}`;
-
     this.versus.push({
       id,
       equipo1: '',
       equipo2: '',
       desempate: '',
       editando: false,
-      liga: this.ligaSeleccionada,
-      categoria: this.categoriaSeleccionada,
-      dia: this.dia
+      dia: this.dia,
+      torneoId: this.selectedTournamentId
     });
   }
 
-
- submit() {
-    console.log(this.versus);
-    this.downloadJson(this.versus, 'partidos.json');
+  /** 👉 Enviar partidos nuevos al backend */
+  submit() {
+    this.http.post(this.url, this.versus).subscribe({
+      next: () => {
+        console.log('Todos los partidos agregados ✅');
+        this.versus = []; // limpia los partidos que estaban en edición
+        this.loadPartidos(); // recarga desde backend
+      },
+      error: (err) => console.error('Error al guardar partidos:', err)
+    });
   }
 
-  /** 👉 Descargar el JSON que viene del endpoint */
+  /** 👉 Descargar JSON externo (ejemplo: planteles) */
   downloadFromApi() {
+    const tournamentId = this.selectedTournamentId;
     this.http
-      .get('http://192.168.0.19:8080/api/v1/rosters/tournament/43')
+      .get(`http://192.168.0.19:8080/api/v1/rosters/tournament/${tournamentId}`)
       .subscribe(data => {
         this.downloadJson(data, 'planteles.json');
       });
@@ -107,6 +116,27 @@ export class AdminComponent implements OnInit {
     a.download = filename;
     a.click();
     window.URL.revokeObjectURL(url);
+  }
+
+  // 👉 Cargar todos los partidos desde el backend
+  loadPartidos() {
+    this.http.get<Versus[]>(this.url).subscribe({
+      next: (data) => (this.partidos = data),
+      error: (err) => console.error('Error al cargar partidos:', err),
+    });
+  }
+
+  // 👉 Eliminar partido
+  deletePartido(id: number) {
+    if (!confirm('¿Seguro que deseas eliminar este partido?')) return;
+
+    this.http.delete(`${this.url}/${id}`).subscribe({
+      next: () => {
+        console.log(`Partido ${id} eliminado ✅`);
+        this.partidos = this.partidos.filter((p) => p.id !== id);
+      },
+      error: (err) => console.error('Error al eliminar partido:', err),
+    });
   }
 }
 

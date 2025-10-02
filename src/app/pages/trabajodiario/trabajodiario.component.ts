@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../service/auth/auth.service';
+import { getUrl } from '../../config';
 
 
 interface Partido {
@@ -20,38 +21,6 @@ interface Partido {
 }
 
 
-const partidos: Partido[] = [
-  {
-    id: 1,
-    equipo1: "Fresas_FC",
-    equipo2: "AntiFB",
-    desempate: "",
-    editando: false,
-    liga: 1,
-    categoria: 6,
-    dia: "jueves"
-  },
-  {
-    id: 2,
-    equipo1: "AntiFB",
-    equipo2: "Papis_Cachondos",
-    desempate: "",
-    editando: false,
-    liga: 1,
-    categoria: 6,
-    dia: "jueves"
-  },
-  {
-    id: 3,
-    equipo1: "Rayados",
-    equipo2: "HeroesFB",
-    desempate: "",
-    editando: false,
-    liga: 1,
-    categoria: 6,
-    dia: "jueves"
-  }
-];
 
 @Component({
   selector: 'app-trabajo-diario',
@@ -83,14 +52,21 @@ export class TrabajodiarioComponent implements OnInit {
   const user = this.auth.getUser();
   this.usuario = user ? user.username : 'invitado';
 
-  // URL dinámica según usuario
-  if (this.usuario === 'vic') {
-    this.urlPartidos = 'http://50.21.187.205:81/pro/partidos.json';
-  } else if (this.usuario === 'zon') {
-    this.urlPartidos = 'http://50.21.187.205:81/ed/partidos.json';
-  } else {
-    this.urlPartidos = 'http://50.21.187.205:81/default/partidos.json';
-  }
+ // URL base
+const baseUrl = getUrl();
+
+//this.urlPartidos = getUrl() + 'pro/partidos.json'; // agregas la carpeta según el usuario
+
+
+// URL dinámica según el usuario
+if (this.usuario === 'vic') {
+  this.urlPartidos = baseUrl + 'partidos';
+
+} else if (this.usuario === 'zon') {
+  this.urlPartidos = baseUrl + 'ed/partidos.json';
+} else {
+  this.urlPartidos = baseUrl + 'default/partidos.json';
+}
 }
 
 ngOnInit() {
@@ -115,36 +91,38 @@ ngOnInit() {
     }
   });
 }
-  guardarGoles(partido: Partido) {
-    if (partido.g1 === partido.g2 && !partido.desempate) {
-      alert('Hay empate, selecciona quién gana el desempate (L o V).');
-      return;
-    } else if (partido.g1 !== partido.g2) {
-      partido.desempate = '';
-    }
-    partido.editando = false;
-
-    // ✅ Actualiza TODO el día en el mismo endpoint que el botón guardar
-   const payload = this.trabajos.map((p: any) => ({
-    id: p.id,
-    equipo1: p.equipo1,
-    equipo2: p.equipo2,
-    g1: p.g1 != null ? Number(p.g1) : null,
-    g2: p.g2 != null ? Number(p.g2) : null,
-    desempate: p.desempate ?? '',
-    editando: !!p.editando,
-    liga: p.liga,
-    categoria: p.categoria,
-    dia: p.dia
-  }));
-
-  console.log(payload)
-
-    this.http.post(this.urlPartidos, payload).subscribe({
-      next: () => console.log('Datos del día actualizados en servidor ✅'),
-      error: (err) => console.error('Error al guardar en servidor:', err)
-    });
+guardarGoles(partido: Partido) {
+  if (partido.g1 === partido.g2 && !partido.desempate) {
+    alert('Hay empate, selecciona quién gana el desempate (L o V).');
+    return;
+  } else if (partido.g1 !== partido.g2) {
+    partido.desempate = '';
   }
+  partido.editando = false;
+
+  // Solo el partido que se editó
+  const payload = {
+    id: partido.id,
+    equipo1: partido.equipo1,
+    equipo2: partido.equipo2,
+    g1: partido.g1 != null ? Number(partido.g1) : null,
+    g2: partido.g2 != null ? Number(partido.g2) : null,
+    desempate: partido.desempate ?? '',
+    liga: partido.liga,
+    categoria: partido.categoria,
+    dia: partido.dia
+  };
+
+  console.log('Payload a enviar:', payload);
+
+
+
+
+  this.http.put(`${this.urlPartidos}/${partido.id}`, payload).subscribe({
+    next: () => console.log('Partido actualizado en servidor ✅'),
+    error: (err) => console.error('Error al guardar en servidor:', err)
+  });
+}
 
   cambiarDia(event: Event) {
     const valor = (event.target as HTMLSelectElement).value as any;
