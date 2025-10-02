@@ -1,4 +1,4 @@
 export const getUrl = () => {
-  const baseUrl = 'http://localhost:3004/';
+  const baseUrl = 'http://50.21.187.205:81/';
   return baseUrl;
 };
