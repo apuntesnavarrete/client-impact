@@ -8,6 +8,7 @@ import { getUrl } from '../../config';
 
 
 interface Partido {
+  torneoId: number;
   id: number;
   equipo1: string;
   equipo2: string;
@@ -84,6 +85,8 @@ ngOnInit() {
         desempate: p.desempate ?? '', // conserva "L" o "V"
         editando: false
       }));
+
+      console.log(this.trabajos)
     },
     error: (err) => {
       console.error('Error al cargar partidos:', err);
@@ -110,7 +113,9 @@ guardarGoles(partido: Partido) {
     desempate: partido.desempate ?? '',
     liga: partido.liga,
     categoria: partido.categoria,
-    dia: partido.dia
+    dia: partido.dia,
+      torneoId: partido.torneoId // 🔹 agregado
+
   };
 
   console.log('Payload a enviar:', payload);
@@ -142,7 +147,9 @@ accion(tipo: string, partido: Partido) {
     this.router.navigate(['/planteles'], { 
       queryParams: { 
         team: equipos,
-        id: partido.id // 🔹 agregamos el id del partido
+        id: partido.id ,// 🔹 agregamos el id del partido
+          torneoId: partido.torneoId // 🔹 agregado
+
       } 
     });
   }
@@ -152,7 +159,9 @@ accion(tipo: string, partido: Partido) {
     this.router.navigate(['/Goles'], { 
       queryParams: { 
         team: equipos,
-        id: partido.id // 🔹 agregamos el id del partido
+        id: partido.id,
+                  torneoId: partido.torneoId // 🔹 agregado
+ // 🔹 agregamos el id del partido
       } 
     });
   }
@@ -171,7 +180,9 @@ accion(tipo: string, partido: Partido) {
     editando: !!p.editando,
     liga: p.liga,
     categoria: p.categoria,
-    dia: p.dia
+    dia: p.dia,
+      torneoId: p.torneoId // 🔹 agregado
+
   }));
 
   // 🔹 Enviar al servidor

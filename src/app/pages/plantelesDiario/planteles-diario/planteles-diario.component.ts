@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { getUrl } from '../../../config';
 
 // Jugador que vamos a mostrar en la tabla
 interface Jugador {
@@ -39,10 +40,16 @@ export class PlantelesDiarioComponent implements OnInit {
   selectedTeam: string | null = null;
 mensaje: string = ''; // 👈 nuevo
   partidoId: number | null = null; // 👈 nueva variable para el id
+nuevoJugadorDorsal: number | null = null;
 
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
-  private urlPlanteles = 'http://50.21.187.205:81/pro/planteles.json';
+
+  private urlPlanteles = getUrl() + 'pro/planteles.json';
+
+torneoId: number | null = null; // id del torneo
+
+   
 
   ngOnInit() {
     const teamsParam = this.route.snapshot.queryParamMap.get('team');
@@ -51,21 +58,43 @@ mensaje: string = ''; // 👈 nuevo
  const idParam = this.route.snapshot.queryParamMap.get('id');
     this.partidoId = idParam ? Number(idParam) : null;
 
+
+const idTorneoParam = this.route.snapshot.queryParamMap.get('torneoId');
+this.torneoId = idTorneoParam ? Number(idTorneoParam) : null;    
+    
+     this.partidoId = idParam ? Number(idParam) : null;
+
+
     console.log('Equipos desde la URL:', teamsFromUrl);
-    this.cargarPlanteles(teamsFromUrl);
+
+
+
+    if (!this.torneoId) {
+      console.error('⚠️ No se recibió torneoId en la URL');
+      alert('No se especificó el torneo.');
+      return;
+    }
+
+    const url = `${getUrl()}planteles/${this.torneoId}`;
+    console.log('🌐 Cargando planteles desde:', url);
+
+    this.cargarPlanteles(teamsFromUrl,url);
+
   }
+
+
+  
 
   get plantelesKeys(): string[] {
     return Object.keys(this.planteles);
   }
 
- cargarPlanteles(teamsFilter: string[]) {
-  this.http.get<RawData[]>(this.urlPlanteles).subscribe({
+cargarPlanteles(teamsFilter: string[], url: string) {
+  this.http.get<any[]>(url).subscribe({
     next: (data) => {
       this.planteles = {};
-
-      // Inicializa equipos filtrados aunque no tengan jugadores
       teamsFilter.forEach(team => this.planteles[team] = []);
+      console.log(data)
 
       data.forEach((item) => {
         const teamName = item.teams.name;
@@ -80,14 +109,15 @@ mensaje: string = ''; // 👈 nuevo
           asistencia: false,
           participantId: item.participants.id,
           teamId: item.teams.id,
+          dorsal: item.dorsal
         });
       });
 
       this.selectedTeam = this.plantelesKeys[0] || null;
-      console.log('Planteles cargados:', this.planteles);
+      console.log('✅ Planteles cargados:', this.planteles);
     },
     error: (err) => {
-      console.error('Error al cargar planteles:', err);
+      console.error('❌ Error al cargar planteles:', err);
       alert('No se pudieron cargar los planteles.');
     },
   });
@@ -106,12 +136,14 @@ enviarAsistencia() {
       name: jugador.name,
       dorsal: jugador.dorsal,
       asistencia: jugador.asistencia,
-      partidoId: this.partidoId // 🔹 agregamos el id del partido
+      partidoId: this.partidoId, // 🔹 agregamos el id del partido
+    torneoId: this.torneoId // 🔹 ahora funciona correctamente
+
     }));
 
   console.log('Asistencias a enviar:', asistenciaArray);
 
-  this.http.post('http://50.21.187.205:81/pro/planteles_asistencia.json', asistenciaArray)
+this.http.post(getUrl() + 'pro/planteles_asistencia.json', asistenciaArray)
     .subscribe({
       next: (res) => {
         console.log('Asistencia enviada correctamente:', res);
@@ -158,26 +190,32 @@ agregarNuevoJugador() {
     asistencia: true, // asistencia siempre true
     participantId: Date.now(), // generar un id temporal único
     teamId: equipoId,
+    dorsal: this.nuevoJugadorDorsal || undefined, // agregamos el dorsal
+
   };
 
   // Agregamos al arreglo local
   this.planteles[this.selectedTeam].push(nuevoJugador);
 
   // Enviar directamente al backend
-  this.http.post('http://50.21.187.205:81/pro/planteles_asistencia.json', [{
+this.http.post(getUrl() + 'pro/planteles_asistencia.json', [{
     teamId: nuevoJugador.teamId,
     teamName: this.selectedTeam,
     participantId: nuevoJugador.participantId,
     name: nuevoJugador.name,
     dorsal: nuevoJugador.dorsal,
     asistencia: true,
-    partidoId: this.partidoId
+    partidoId: this.partidoId,
+        torneoId: this.torneoId
+
   }]).subscribe({
     next: (res) => {
       console.log('Nuevo jugador enviado:', res);
       this.mensaje = `✅ Nuevo jugador "${nuevoJugador.name}" agregado y asistencia enviada.`;
       setTimeout(() => this.mensaje = '', 10000);
-      this.nuevoJugadorNombre = ''; // limpiar input
+this.nuevoJugadorNombre = ''; // limpiar input
+      this.nuevoJugadorDorsal = null; // limpiar dorsal
+
     },
     error: (err) => {
       console.error('Error al enviar nuevo jugador:', err);

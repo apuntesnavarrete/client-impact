@@ -12,6 +12,7 @@ interface Asistencia {
   asistencia: boolean;
   goles?: number; // 👈 nuevo campo
   partidoId:number
+  dorsal:string
 }
 
 @Component({
@@ -42,20 +43,27 @@ const idParam = this.route.snapshot.queryParamMap.get('id'); // 🔹 obtener id 
   }
 
   cargarAsistencias() {
-    this.http.get<Asistencia[]>('http://50.21.187.205:81/pro/planteles_asistencia.json')
-      .subscribe({
-        next: (data) => {
-          // 🔹 Filtrar por partidoId si existe
-          this.asistencias = data
-            .filter(item => this.partidoId == null || item.partidoId === this.partidoId)
-            .map(item => ({
-              ...item,
-              goles: item.goles != null ? item.goles : 0
-            }));
-          console.log('Asistencias filtradas por partido:', this.asistencias);
-        },
-        error: (err) => console.error('Error al cargar asistencias:', err)
-      });
+this.http.get('http://50.21.187.205:81/pro/planteles_asistencia.json', { responseType: 'text' })
+  .subscribe({
+    next: (textData) => {
+      try {
+        // Quitar cualquier carácter después del último ']'
+        const cleanText = textData.substring(0, textData.lastIndexOf(']') + 1);
+        const data: Asistencia[] = JSON.parse(cleanText);
+
+        this.asistencias = data
+          .filter(item => this.partidoId == null || item.partidoId === this.partidoId)
+          .map(item => ({ ...item, goles: item.goles ?? 0 }));
+
+        console.log('Asistencias filtradas:', this.asistencias);
+      } catch (err) {
+        console.error('Error parseando JSON:', err, 'Texto recibido:', textData);
+      }
+    },
+    error: (err) => console.error('Error al cargar asistencias:', err)
+  });
+
+
   }
 
   get participantesFiltrados(): Asistencia[] {

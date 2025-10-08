@@ -99,24 +99,48 @@ export class AdminComponent implements OnInit {
   }
 
   /** 👉 Descargar JSON externo (ejemplo: planteles) */
-  downloadFromApi() {
-    const tournamentId = this.selectedTournamentId;
-    this.http
-      .get(`http://192.168.0.19:8080/api/v1/rosters/tournament/${tournamentId}`)
-      .subscribe(data => {
-        this.downloadJson(data, 'planteles.json');
-      });
-  }
+/** 👉 Descargar JSON externo (ejemplo: planteles) */
+downloadFromApi() {
+  const tournamentId = this.selectedTournamentId;
 
-  private downloadJson(data: any, filename: string) {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  }
+  this.http
+    .get(`http://192.168.0.19:8080/api/v1/rosters/tournament/${tournamentId}`)
+    .subscribe(data => {
+      // 🔹 Aquí agregamos el ID del torneo en el nombre del archivo
+      const filename = `planteles-${tournamentId}.json`;
+      this.downloadJson(data, filename);
+    });
+}
+
+ private downloadJson(data: any, filename: string) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+/** 👉 Enviar JSON de planteles al backend para guardarlo */
+uploadToBackend() {
+  const tournamentId = this.selectedTournamentId;
+
+  this.http
+    .get(`http://192.168.0.19:8080/api/v1/rosters/tournament/${tournamentId}`)
+    .subscribe(data => {
+
+       const backendUrl = `${getUrl()}planteles/${tournamentId}`;
+
+      this.http.post(backendUrl, data).subscribe({
+      
+          next: (res) => console.log('✅ Archivo enviado al backend:', res),
+          error: (err) => console.error('❌ Error al enviar al backend:', err)
+        });
+    });
+}
+
+
 
   // 👉 Cargar todos los partidos desde el backend
   loadPartidos() {

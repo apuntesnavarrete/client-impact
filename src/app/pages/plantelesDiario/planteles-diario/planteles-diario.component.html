@@ -25,7 +25,7 @@
           type="checkbox"
           [(ngModel)]="jugador.asistencia"
         />
-        {{ jugador.name }}
+        {{ jugador.name }} #- {{jugador.dorsal}}
       </label>
     </li>
   </ul>
@@ -42,12 +42,23 @@
 
 <div *ngIf="selectedTeam" class="nuevo-jugador">
   <h4>Agregar nuevo jugador a {{ selectedTeam }}</h4>
+  
+  <!-- Nombre -->
   <input
     type="text"
     [(ngModel)]="nuevoJugadorNombre"
     placeholder="Nombre del jugador"
     class="input-nuevo-jugador"
   />
+
+  <!-- Dorsal -->
+  <input
+    type="number"
+    [(ngModel)]="nuevoJugadorDorsal"
+    placeholder="Dorsal del jugador"
+    class="input-nuevo-jugador"
+  />
+
   <button class="btn-agregar" (click)="agregarNuevoJugador()">Agregar y enviar</button>
 </div>
 
