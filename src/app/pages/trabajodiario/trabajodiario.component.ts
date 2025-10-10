@@ -59,34 +59,40 @@ const baseUrl = getUrl();
 //this.urlPartidos = getUrl() + 'pro/partidos.json'; // agregas la carpeta según el usuario
 
 
-// URL dinámica según el usuario
-if (this.usuario === 'vic') {
+
   this.urlPartidos = baseUrl + 'partidos';
 
-} else if (this.usuario === 'zon') {
-  this.urlPartidos = baseUrl + 'ed/partidos.json';
-} else {
-  this.urlPartidos = baseUrl + 'default/partidos.json';
-}
 }
 
 ngOnInit() {
   this.cargarTrabajos(); // carga automáticamente el día de hoy
 }
 
- cargarTrabajos() {
+cargarTrabajos() {
   this.http.get<any[]>(this.urlPartidos).subscribe({
     next: (data) => {
-      // ✅ Filtra los partidos que tengan el día seleccionado
-      const partidosDia = data.filter(p => p.dia === this.diaSeleccionado);
+      let partidosFiltrados = data;
 
-      this.trabajos = partidosDia.map((p: any) => ({
+      // ✅ Primero: filtrar por usuario
+      if (this.usuario === 'vic') {
+        partidosFiltrados = partidosFiltrados.filter(p => [43, 39].includes(p.torneoId));
+      } else if (this.usuario === 'zon') {
+        partidosFiltrados = partidosFiltrados.filter(p => ![43, 39].includes(p.torneoId));
+      }
+
+      // ✅ Segundo: filtrar por día
+      partidosFiltrados = partidosFiltrados.filter(p => p.dia === this.diaSeleccionado);
+
+      // ✅ Finalmente, preparar los datos
+      this.trabajos = partidosFiltrados.map(p => ({
         ...p,
-        desempate: p.desempate ?? '', // conserva "L" o "V"
+        g1: p.g1 ?? null,
+        g2: p.g2 ?? null,
+        desempate: p.desempate ?? '',
         editando: false
       }));
 
-      console.log(this.trabajos)
+      console.log('Partidos cargados:', this.trabajos);
     },
     error: (err) => {
       console.error('Error al cargar partidos:', err);
@@ -94,6 +100,7 @@ ngOnInit() {
     }
   });
 }
+
 guardarGoles(partido: Partido) {
   if (partido.g1 === partido.g2 && !partido.desempate) {
     alert('Hay empate, selecciona quién gana el desempate (L o V).');
