@@ -79,7 +79,7 @@ cargarTrabajos() {
       } else if (this.usuario === 'zon') {
         partidosFiltrados = partidosFiltrados.filter(p => ![43, 39].includes(p.torneoId));
       }
-
+console.log('Partidos partidosFiltrados:', partidosFiltrados);
       // ✅ Segundo: filtrar por día
       partidosFiltrados = partidosFiltrados.filter(p => p.dia === this.diaSeleccionado);
 

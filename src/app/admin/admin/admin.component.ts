@@ -11,15 +11,21 @@ interface Team {
 }
 
 interface Versus {
-  id: number;       
+  id: number;
   equipo1: string;
   equipo2: string;
+  equipo1Id?: number;
+  equipo2Id?: number;
   g1?: number;
   g2?: number;
   desempate: string;
   editando: boolean;
   dia: string;
   torneoId: number;
+  jornada: number; 
+  matchdate: string | null; // ✅ new field
+
+  // ✅ new field
 }
 
 @Component({
@@ -32,9 +38,12 @@ export class AdminComponent implements OnInit {
   teams: Team[] = [];
   diasDisponibles = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
   dia = '';
+  plantelesJSON: string = ''; // <- aquí se mostrará el JSON de planteles
+plantelesFiltrados: any[] = [];
 
   versus: Versus[] = [];   // partidos en edición (frontend)
   partidos: Versus[] = []; // partidos cargados desde backend
+transformedJSON: string = ''; // 🔹 para guardar el JSON transformado y mostrarlo
 
   // Opciones de torneo
   torneos = [
@@ -51,6 +60,9 @@ export class AdminComponent implements OnInit {
   selectedTournamentId = 43; // valor inicial
   baseUrl = getUrl();
   url = this.baseUrl + 'partidos';
+planteles: any[] = []; // store the roster data
+jornada: number | null = null;
+matchDate: string | null = null;
 
   constructor(private http: HttpClient) {}
 
@@ -64,6 +76,7 @@ export class AdminComponent implements OnInit {
     this.http
       .get<any[]>(`http://192.168.0.19:8080/api/v1/teams-tournament/tournament/${tournamentId}`)
       .subscribe(data => {
+        console.log(data)
         this.teams = data.map(item => ({
           id: item.teams?.id,
           name: item.teams?.name,
@@ -73,30 +86,47 @@ export class AdminComponent implements OnInit {
   }
 
   /** 👉 Agregar partido con ID temporal */
-  addVersus() {
-    const id = this.versus.length + 1;
-    this.versus.push({
-      id,
-      equipo1: '',
-      equipo2: '',
-      desempate: '',
-      editando: false,
-      dia: this.dia,
-      torneoId: this.selectedTournamentId
-    });
+addVersus() {
+  if (this.jornada === null) {
+    alert('Por favor ingresa la jornada antes de crear partidos.');
+    return;
   }
 
+  const id = Number(this.versus.length + 1);
+
+  this.versus.push({
+    id,
+    equipo1: '',
+    equipo2: '',
+    equipo1Id: undefined,
+    equipo2Id: undefined,
+    desempate: '',
+    editando: false,
+    dia: this.dia,
+    torneoId: Number(this.selectedTournamentId),
+    jornada: this.jornada ,// ✅ include jornada
+    matchdate: this.matchDate // ✅ added here
+
+  });
+}
+
   /** 👉 Enviar partidos nuevos al backend */
-  submit() {
-    this.http.post(this.url, this.versus).subscribe({
-      next: () => {
-        console.log('Todos los partidos agregados ✅');
-        this.versus = []; // limpia los partidos que estaban en edición
-        this.loadPartidos(); // recarga desde backend
-      },
-      error: (err) => console.error('Error al guardar partidos:', err)
-    });
-  }
+submit() {
+  const readyMatches = this.versus.map(v => ({
+    ...v,
+    equipo1: this.teams.find(t => t.id === v.equipo1Id)?.name || '',
+    equipo2: this.teams.find(t => t.id === v.equipo2Id)?.name || '',
+  }));
+
+  this.http.post(this.url, readyMatches).subscribe({
+    next: () => {
+      console.log('✅ Partidos guardados');
+      this.versus = [];
+      this.loadPartidos();
+    },
+    error: err => console.error('❌ Error al guardar:', err)
+  });
+}
 
   /** 👉 Descargar JSON externo (ejemplo: planteles) */
 /** 👉 Descargar JSON externo (ejemplo: planteles) */
@@ -143,12 +173,14 @@ uploadToBackend() {
 
 
   // 👉 Cargar todos los partidos desde el backend
-  loadPartidos() {
-    this.http.get<Versus[]>(this.url).subscribe({
-      next: (data) => (this.partidos = data),
-      error: (err) => console.error('Error al cargar partidos:', err),
-    });
-  }
+loadPartidos() {
+  this.http.get<Versus[]>(this.url).subscribe({
+    next: (data) => {
+      this.partidos = data.map(p => ({ ...p, id: Number(p.id) }));
+    },
+    error: (err) => console.error('Error al cargar partidos:', err),
+  });
+}
 
   // 👉 Eliminar partido
   deletePartido(id: number) {
@@ -162,5 +194,106 @@ uploadToBackend() {
       error: (err) => console.error('Error al eliminar partido:', err),
     });
   }
+
+
+ // add this property
+selectedMatch: Versus | null = null;
+
+mostrarinfo(id: number) {
+  const match = this.partidos.find(p => p.id === id);
+
+  if (!match) {
+    console.warn(`No se encontró el partido con id ${id}`);
+    return;
+  }
+
+  this.selectedMatch = match;
+
+  // 🔹 Crear JSON transformado tipo "finalData"
+  const transformedMatch = {
+    teamHome: match.equipo1Id ?? null,
+    teamAway: match.equipo2Id ?? null,
+    date: match.matchdate,
+    matchday: match.jornada,
+    localgoals: match.g1 ?? null,
+    visitangoals: match.g2 ?? null,
+    ganadorDesempate: match.desempate || null,
+    tournaments: match.torneoId,
+    pointsLocal:
+      match.g1 != null && match.g2 != null
+        ? match.g1 > match.g2
+          ? 3
+          : match.g1 < match.g2
+          ? 0
+          : match.desempate === 'local'
+          ? 2
+          : match.desempate === 'visitante'
+          ? 1
+          : 1
+        : 0,
+    pointsVisitan:
+      match.g1 != null && match.g2 != null
+        ? match.g2 > match.g1
+          ? 3
+          : match.g2 < match.g1
+          ? 0
+          : match.desempate === 'visitante'
+          ? 2
+          : match.desempate === 'local'
+          ? 1
+          : 1
+        : 0,
+  };
+
+  // 🔹 Guardar para mostrar en HTML y copiar
+  this.transformedJSON = JSON.stringify(transformedMatch, null, 2);
+
+  console.log('🎯 Partido transformado (listo para copiar):', transformedMatch);
+
+  // 🔹 Cargar planteles filtrados
+  this.http
+    .get(`http://50.21.187.205:81/pro/planteles_asistencia.json`, { responseType: 'text' })
+    .subscribe({
+      next: (textData) => {
+        try {
+          const cleanText = textData.substring(0, textData.lastIndexOf(']') + 1);
+          const data = JSON.parse(cleanText);
+
+          const filtrados = data.filter(
+            (item: any) =>
+              item.torneoId === match.torneoId && item.partidoId === match.id
+          );
+
+          this.plantelesFiltrados = filtrados;
+          this.plantelesJSON = JSON.stringify(filtrados, null, 2);
+     
+          // 🔹 Transformar los datos al nuevo formato
+const transformed = filtrados.map((p: any) => ({
+  annotations: p.goles ?? 0,
+  attendance: p.asistencia === true,
+  participants: p.participantId,
+  teams: p.teamId
+}));
+
+// 🔹 Guardar los datos transformados para mostrar en HTML
+this.plantelesFiltrados = transformed;
+this.plantelesJSON = JSON.stringify(transformed, null, 2);
+     
+     
+     
+        } catch (err) {
+          this.plantelesJSON = 'Error parseando JSON: ' + err;
+          console.error('Error parseando JSON:', err, 'Texto recibido:', textData);
+        }
+      },
+      error: (err) => {
+        this.plantelesJSON = 'Error al cargar planteles: ' + err.message;
+        console.error('Error al cargar planteles:', err);
+      },
+    });
+}
+
+
+
 }
 

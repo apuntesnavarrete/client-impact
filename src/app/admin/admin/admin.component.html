@@ -9,22 +9,23 @@
   <option *ngFor="let d of diasDisponibles" [value]="d">{{ d }}</option>
 </select>
 
+<label>Jornada:</label>
+<input type="number" [(ngModel)]="jornada" placeholder="Ej. 1" />
 
+<label>Match date:</label>
+<input type="date" [(ngModel)]="matchDate" />
 
-
-  <div *ngFor="let v of versus; let i = index" class="mb-2">
-    <select [(ngModel)]="v.equipo1" class="border p-1 mr-2">
-      <option value="">-- Equipo 1 --</option>
-      <option *ngFor="let t of teams" [value]="t.name">{{ t.name }}</option>
-    </select>
+<div *ngFor="let v of versus; let i = index">
+  <select [(ngModel)]="v.equipo1Id">
+    <option *ngFor="let t of teams" [ngValue]="t.id">{{ t.name }}</option>
+  </select>
 
     <span>vs</span>
 
-    <select [(ngModel)]="v.equipo2" class="border p-1 ml-2">
-      <option value="">-- Equipo 2 --</option>
-      <option *ngFor="let t of teams" [value]="t.name">{{ t.name }}</option>
-    </select>
-  </div>
+    <select [(ngModel)]="v.equipo2Id">
+    <option *ngFor="let t of teams" [ngValue]="t.id">{{ t.name }}</option>
+  </select>
+</div>
 
   <button (click)="addVersus()" class="bg-blue-500 text-white px-2 py-1 mr-2">
     + Agregar
@@ -57,6 +58,8 @@
       <th>Día</th>
       <th>Torneo</th>
       <th>Acciones</th>
+      <th>Mostrar</th>
+
     </tr>
   </thead>
   <tbody>
@@ -70,6 +73,68 @@
       <td>
         <button (click)="deletePartido(partido.id)">🗑️ Eliminar</button>
       </td>
+       <td>
+        <button (click)="mostrarinfo(partido.id)">Revisar </button>
+      </td>
     </tr>
   </tbody>
 </table>
+
+
+<div *ngIf="selectedMatch" class="mt-4">
+  <h3>Información del partido</h3>
+
+  <!-- ✅ Table view -->
+  <table border="1" cellpadding="5">
+    <tr>
+      <th>ID</th>
+      <th>Equipo 1</th>
+      <th>Equipo 2</th>
+      <th>Goles 1</th>
+      <th>Goles 2</th>
+      <th>Desempate</th>
+      <th>Día</th>
+      <th>Torneo ID</th>
+      <th>Jornada</th>
+
+    </tr>
+    <tr>
+      <td>{{ selectedMatch.id }}</td>
+      <td>{{ selectedMatch.equipo1 }}</td>
+      <td>{{ selectedMatch.equipo2 }}</td>
+      <td>{{ selectedMatch.g1 || '-' }}</td>
+      <td>{{ selectedMatch.g2 || '-' }}</td>
+      <td>{{ selectedMatch.desempate }}</td>
+      <td>{{ selectedMatch.dia }}</td>
+      <td>{{ selectedMatch.torneoId }}</td>
+      <td>{{ selectedMatch.jornada }}</td>
+
+    </tr>
+  </table>
+
+<h3>Partido transformado:</h3>
+<pre>{{ transformedJSON }}</pre>
+</div>
+
+<div *ngIf="plantelesFiltrados.length > 0">
+  <h3>Planteles del partido</h3>
+  <table border="1" cellpadding="5">
+    <tr>
+      <th>Equipo</th>
+      <th>Jugador</th>
+      <th>Número</th>
+      <th>Goles</th>
+      <th>Asistencia</th>
+    </tr>
+    <tr *ngFor="let jugador of plantelesFiltrados">
+      <td>{{ jugador.teamName }}</td>
+      <td>{{ jugador.name }}</td>
+      <td>{{ jugador.dorsal }}</td>
+      <td>{{ jugador.goles }}</td>
+      <td>{{ jugador.asistencia ? 'Sí' : 'No' }}</td>
+    </tr>
+  </table>
+
+  <h4>JSON de planteles:</h4>
+  <pre>{{ plantelesJSON }}</pre>
+</div>
