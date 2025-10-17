@@ -222,6 +222,11 @@ accion(tipo: string, partido: Partido) {
     a.click();
     URL.revokeObjectURL(url);
   }
+
+  logout() {
+    this.auth.logout();        // Borra la sesión
+    this.router.navigate(['/']);  // Redirige al login
+  }
 }
 
 
