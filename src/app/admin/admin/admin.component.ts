@@ -44,6 +44,7 @@ plantelesFiltrados: any[] = [];
   versus: Versus[] = [];   // partidos en edición (frontend)
   partidos: Versus[] = []; // partidos cargados desde backend
 transformedJSON: string = ''; // 🔹 para guardar el JSON transformado y mostrarlo
+plantelesTemporalesJSON: string = ''; // ← para mostrar los temporales
 
   // Opciones de torneo
   torneos = [
@@ -251,49 +252,60 @@ mostrarinfo(id: number) {
   console.log('🎯 Partido transformado (listo para copiar):', transformedMatch);
 
   // 🔹 Cargar planteles filtrados
-  this.http
-    .get(`http://50.21.187.205:81/pro/planteles_asistencia.json`, { responseType: 'text' })
-    .subscribe({
-      next: (textData) => {
-        try {
-          const cleanText = textData.substring(0, textData.lastIndexOf(']') + 1);
-          const data = JSON.parse(cleanText);
+this.http
+  .get(`http://50.21.187.205:81/pro/planteles_asistencia.json`, { responseType: 'text' })
+  .subscribe({
+    next: (textData) => {
+      try {
+        const cleanText = textData.substring(0, textData.lastIndexOf(']') + 1);
+        const data = JSON.parse(cleanText);
 
-          const filtrados = data.filter(
-            (item: any) =>
-              item.torneoId === match.torneoId && item.partidoId === match.id
-          );
+        const filtrados = data.filter(
+          (item: any) =>
+            item.torneoId === match.torneoId && item.partidoId === match.id
+        );
 
-          this.plantelesFiltrados = filtrados;
-          this.plantelesJSON = JSON.stringify(filtrados, null, 2);
-     
-          // 🔹 Transformar los datos al nuevo formato
-const transformed = filtrados.map((p: any) => ({
-  annotations: p.goles ?? 0,
-  attendance: p.asistencia === true,
-  participants: p.participantId,
-  teams: p.teamId
-}));
+        // 🔹 Separamos los jugadores por tipo de ID
+        const temporales = filtrados.filter((p: any) => p.participantId > 1_000_000_000);
+        const reales = filtrados.filter((p: any) => p.participantId <= 1_000_000_000);
 
-// 🔹 Guardar los datos transformados para mostrar en HTML
-this.plantelesFiltrados = transformed;
-this.plantelesJSON = JSON.stringify(transformed, null, 2);
-     
-     
-     
-        } catch (err) {
-          this.plantelesJSON = 'Error parseando JSON: ' + err;
-          console.error('Error parseando JSON:', err, 'Texto recibido:', textData);
-        }
-      },
-      error: (err) => {
-        this.plantelesJSON = 'Error al cargar planteles: ' + err.message;
-        console.error('Error al cargar planteles:', err);
-      },
-    });
+        // 🔹 Los reales se imprimen igual que antes
+        const transformedReales = reales.map((p: any) => ({
+          annotations: p.goles ?? 0,
+          attendance: p.asistencia === true,
+          participants: p.participantId,
+          teams: p.teamId
+        }));
+
+        this.plantelesFiltrados = transformedReales;
+        this.plantelesJSON = JSON.stringify(transformedReales, null, 2);
+
+        // 🔹 Los temporales se guardan en otro JSON
+        const transformedTemporales = temporales.map((p: any) => ({
+          annotations: p.goles ?? 0,
+          attendance: p.asistencia === true,
+          participants: p.participantId,
+          teams: p.teamId
+        }));
+
+        // Guardar en otra propiedad
+        this.plantelesTemporalesJSON = JSON.stringify(transformedTemporales, null, 2);
+
+        console.log('✅ Reales:', transformedReales);
+        console.log('🕒 Temporales:', transformedTemporales);
+
+      } catch (err) {
+        this.plantelesJSON = 'Error parseando JSON: ' + err;
+        console.error('Error parseando JSON:', err, 'Texto recibido:', textData);
+      }
+    },
+    error: (err) => {
+      this.plantelesJSON = 'Error al cargar planteles: ' + err.message;
+      console.error('Error al cargar planteles:', err);
+    },
+  });
+
+
 }
-
-
-
 }
 

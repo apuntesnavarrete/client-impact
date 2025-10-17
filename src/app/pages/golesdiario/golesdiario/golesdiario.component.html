@@ -9,12 +9,19 @@
   <h3>Jugadores de {{ selectedTeam }}</h3>
 
   <form>
-    <div *ngFor="let jugador of participantesFiltrados; let i = index" class="jugador-item">
-      <label>
-        
-        <input type="number" [(ngModel)]="jugador.goles" [name]="'goles' + i" placeholder="Goles" class="input-goles" />
-    {{ jugador.name }} # {{jugador.dorsal}}
-    </label>
+  <div *ngFor="let jugador of participantesFiltrados; let i = index" class="jugador-item">
+  <label>
+    <input 
+      type="number" 
+      [(ngModel)]="jugador.goles" 
+      [name]="'goles' + i" 
+      placeholder="Goles" 
+      class="input-goles" 
+    />
+    {{ jugador.name }} 
+    <span *ngIf="esNuevo(jugador)" style="color: green; font-weight: bold;">(new)</span>
+    # {{ jugador.dorsal }}
+  </label>
 
   <button 
     type="button" 
@@ -25,9 +32,7 @@
   >
     {{ jugador.asistencia ? 'Asistencia: ✅' : 'Asistencia: ❌' }}
   </button>
-
-
-    </div>
+</div>
   </form>
 
   <p class="total-goles">Total goles: {{ totalGoles }}</p>

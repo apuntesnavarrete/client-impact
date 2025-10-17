@@ -118,6 +118,9 @@ cambiarAsistencia(jugador: Asistencia) {
   }
 }
 
+esNuevo(jugador: Asistencia): boolean {
+  return jugador.participantId > 1_000_000_000; // IDs creados con Date.now()
+}
 }
 
 

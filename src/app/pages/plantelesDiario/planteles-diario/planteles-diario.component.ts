@@ -49,7 +49,8 @@ nuevoJugadorDorsal: number | null = null;
 
 torneoId: number | null = null; // id del torneo
 
-   
+   teamHomeName: string = '';
+teamAwayName: string = '';
 
   ngOnInit() {
     const teamsParam = this.route.snapshot.queryParamMap.get('team');
@@ -79,6 +80,11 @@ this.torneoId = idTorneoParam ? Number(idTorneoParam) : null;
     console.log('🌐 Cargando planteles desde:', url);
 
     this.cargarPlanteles(teamsFromUrl,url);
+
+
+     if (this.partidoId) {
+    this.cargarPartidoPorId(this.partidoId);
+  }
 
   }
 
@@ -110,6 +116,7 @@ cargarPlanteles(teamsFilter: string[], url: string) {
           participantId: item.participants.id,
           teamId: item.teams.id,
           dorsal: item.dorsal
+        
         });
       });
 
@@ -181,9 +188,18 @@ getTotal(): number {
 nuevoJugadorNombre: string = '';
 
 agregarNuevoJugador() {
+
+  
+
   if (!this.selectedTeam || !this.nuevoJugadorNombre.trim() || this.partidoId === null) return;
 
-  const equipoId = this.planteles[this.selectedTeam][0]?.teamId || 0; // Tomamos el teamId de un jugador existente si hay
+const equipoId = (() => {
+  if (!this.selectedTeam) return 0;
+  if (this.selectedTeam === this.teamHomeName) return this.teamHomeId!;
+  if (this.selectedTeam === this.teamAwayName) return this.teamAwayId!;
+  return 0; // fallback
+})();
+
 
   const nuevoJugador: Jugador = {
     name: this.nuevoJugadorNombre.trim(),
@@ -193,7 +209,7 @@ agregarNuevoJugador() {
     dorsal: this.nuevoJugadorDorsal || undefined, // agregamos el dorsal
 
   };
-
+console.log(nuevoJugador)
   // Agregamos al arreglo local
   this.planteles[this.selectedTeam].push(nuevoJugador);
 
@@ -221,6 +237,25 @@ this.nuevoJugadorNombre = ''; // limpiar input
       console.error('Error al enviar nuevo jugador:', err);
       this.mensaje = '❌ Error al agregar nuevo jugador.';
     }
+  });
+}
+
+teamHomeId: number | null = null;
+teamAwayId: number | null = null;
+
+cargarPartidoPorId(id: number) {
+  const url = 'http://50.21.187.205:81/partidos';
+  this.http.get<any[]>(url).subscribe({
+    next: (data) => {
+      const partido = data.find(p => p.id === id);
+      if (partido) {
+        this.teamHomeId = partido.equipo1Id;
+        this.teamAwayId = partido.equipo2Id;
+        this.teamHomeName = partido.equipo1;
+        this.teamAwayName = partido.equipo2;
+      }
+    },
+    error: (err) => console.error(err)
   });
 }
 
