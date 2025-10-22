@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../../environments/environment';
 
 interface Asistencia {
   teamId: number;
@@ -26,6 +27,7 @@ export class GolesdiarioComponent implements OnInit {
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
   partidoId: number | null = null; // 🔹 Nuevo: almacenar id del partido
+private baseUrl = environment.baseUrl;
 
   asistencias: Asistencia[] = [];
   teamsFromUrl: string[] = [];
@@ -43,7 +45,7 @@ const idParam = this.route.snapshot.queryParamMap.get('id'); // 🔹 obtener id 
   }
 
   cargarAsistencias() {
-this.http.get('http://50.21.187.205:81/pro/planteles_asistencia.json', { responseType: 'text' })
+  this.http.get(`${this.baseUrl}asistencias`, { responseType: 'text' })
   .subscribe({
     next: (textData) => {
       try {
@@ -75,7 +77,8 @@ guardarGoles() {
 const datos = this.participantesFiltrados.map(j => ({
   ...j,
   partidoId: this.partidoId // 🔹 importante
-}));  this.http.post('http://50.21.187.205:81/pro/planteles_goles.json', datos)
+}));  
+  this.http.post(`${this.baseUrl}asistencias`, datos)
     .subscribe({
       next: res => {
         console.log('Guardado en backend:', res);
@@ -100,7 +103,7 @@ cambiarAsistencia(jugador: Asistencia) {
 
   // Opcional: enviar cambio al backend inmediatamente
   if (this.partidoId !== null) {
-    this.http.post('http://50.21.187.205:81/pro/planteles_asistencia.json', [{
+    this.http.post(`${this.baseUrl}asistencias`, [{
       ...jugador,
       asistencia: jugador.asistencia,
       partidoId: this.partidoId

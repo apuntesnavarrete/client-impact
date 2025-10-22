@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { getUrl } from '../../../config';
+import { environment } from '../../../../environments/environment';
 
 // Jugador que vamos a mostrar en la tabla
 interface Jugador {
@@ -51,6 +52,7 @@ torneoId: number | null = null; // id del torneo
 
    teamHomeName: string = '';
 teamAwayName: string = '';
+private baseUrl = environment.baseUrl;
 
   ngOnInit() {
     const teamsParam = this.route.snapshot.queryParamMap.get('team');
@@ -150,7 +152,7 @@ enviarAsistencia() {
 
   console.log('Asistencias a enviar:', asistenciaArray);
 
-this.http.post(getUrl() + 'pro/planteles_asistencia.json', asistenciaArray)
+this.http.post(getUrl() + 'asistencias', asistenciaArray)
     .subscribe({
       next: (res) => {
         console.log('Asistencia enviada correctamente:', res);
@@ -214,7 +216,7 @@ console.log(nuevoJugador)
   this.planteles[this.selectedTeam].push(nuevoJugador);
 
   // Enviar directamente al backend
-this.http.post(getUrl() + 'pro/planteles_asistencia.json', [{
+this.http.post(getUrl() + 'asistencias', [{
     teamId: nuevoJugador.teamId,
     teamName: this.selectedTeam,
     participantId: nuevoJugador.participantId,
@@ -244,7 +246,7 @@ teamHomeId: number | null = null;
 teamAwayId: number | null = null;
 
 cargarPartidoPorId(id: number) {
-  const url = 'http://50.21.187.205:81/partidos';
+  const url = `${this.baseUrl}partidos`;
   this.http.get<any[]>(url).subscribe({
     next: (data) => {
       const partido = data.find(p => p.id === id);
