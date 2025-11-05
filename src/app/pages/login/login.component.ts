@@ -28,7 +28,7 @@ export class LoginComponent {
   login() {
     const body = { username: this.username, password: this.password };
 
-    this.http.post(`${this.baseUrl}auth/login`, body).subscribe({
+    this.http.post(`${this.baseUrl}auth/login`,  body, { withCredentials: true }).subscribe({
       next: (response: any) => {
         // ✅ Usamos el AuthService para guardar la sesión
         this.auth.loginBackend(response);

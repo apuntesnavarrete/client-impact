@@ -67,14 +67,7 @@ ngOnInit() {
   this.cargarTrabajos(); // carga automáticamente el día de hoy
 }
 
-  private getToken(): string | null {
-  if (typeof window !== 'undefined' && window.localStorage && typeof window.localStorage.getItem === 'function') {
-      const token = localStorage.getItem('accessToken');
-      console.log('Token desde localStorage en client:', token);
-      return token;
-    }
-    return null;
-  }
+
 
 cargarTrabajos() {
   this.http.get<any[]>(this.urlPartidos).subscribe({
@@ -138,11 +131,10 @@ guardarGoles(partido: Partido) {
 
 
 
- const token = this.getToken();
 
-   const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
+  // const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
 
-    this.http.put(`${this.urlPartidos}/${partido.id}`, payload, { headers }).subscribe({
+    this.http.put(`${this.urlPartidos}/${partido.id}`, payload, {/* headers*/ }).subscribe({
       next: () => console.log('Partido actualizado en servidor ✅'),
       error: (err) => console.error('Error al guardar en servidor:', err)
     });
@@ -207,11 +199,9 @@ accion(tipo: string, partido: Partido) {
   // 🔹 Enviar al servidor
 
 
-const token = this.getToken();
 
-   const headers = token ? new HttpHeaders({ Authorization: `Bearer ${ token}` }) : undefined;
 
-    this.http.post(this.urlPartidos, payload, { headers  }).subscribe({
+    this.http.post(this.urlPartidos, payload, {   }).subscribe({
       next: () => alert('Datos guardados en servidor ✅'),
       error: (err) => console.error('Error al guardar en servidor:', err)
     });
