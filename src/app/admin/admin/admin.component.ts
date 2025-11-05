@@ -253,7 +253,7 @@ mostrarinfo(id: number) {
 
   // 🔹 Cargar planteles filtrados
 this.http
-  .get(`http://50.21.187.205:81/pro/planteles_asistencia.json`, { responseType: 'text' })
+  .get(`http://50.21.187.205:81/asistencias`, { responseType: 'text' })
   .subscribe({
     next: (textData) => {
       try {

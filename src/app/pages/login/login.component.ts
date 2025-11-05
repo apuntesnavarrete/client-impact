@@ -1,55 +1,45 @@
-import { Component } from '@angular/core';
+import { Component, importProvidersFrom } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../service/auth/auth.service';
-import * as CryptoJS from 'crypto-js';
+import { HttpClient, HttpClientModule, provideHttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { AuthService } from '../../service/auth/auth.service'; // 👈 importa el servicio
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
   username: string = '';
   password: string = '';
   message: string = '';
+  private baseUrl = environment.baseUrl;
 
-  // Usuario y hash SHA-256 de la contraseña
- private readonly users = [
- {
-  username: 'vic',
-  passwordHash: '07a24954ade82eae92abbb40fc522955e0df693d6051a707b58f795bf4f5d5cc',
-  role: 'admin'
-},
-  {
-    username: 'zon',
-    passwordHash: '69186c5f798ab56f3bfbff4c9128b66610b86852146303607243ebc3a2bb68d8',
-    role: 'player'
-  }
-];
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private auth: AuthService // 👈 inyecta el servicio
+  ) {}
 
-  constructor(private auth: AuthService, private router: Router) {}
+  login() {
+    const body = { username: this.username, password: this.password };
 
-login() {
-  const hash = this.hashPassword(this.password);
+    this.http.post(`${this.baseUrl}auth/login`, body).subscribe({
+      next: (response: any) => {
+        // ✅ Usamos el AuthService para guardar la sesión
+        this.auth.loginBackend(response);
 
-  const user = this.users.find(
-    u => u.username === this.username && u.passwordHash === hash
-  );
-
-  if (user) {
-    this.auth.login(user);  // ✅ pasas el usuario encontrado
-    this.router.navigate(['/trabajo']);
-  } else {
-    this.message = '❌ Usuario o contraseña incorrectos';
-  }
-}
-
-  private hashPassword(password: string): string {
-    return CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
+        // ✅ Redirigir después del login
+        this.router.navigate(['/trabajo']);
+      },
+      error: () => {
+        this.message = '❌ Usuario o contraseña incorrectos';
+      }
+    });
   }
 }
 

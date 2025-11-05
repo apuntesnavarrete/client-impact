@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../service/auth/auth.service';
 import { getUrl } from '../../config';
@@ -26,7 +26,7 @@ interface Partido {
 @Component({
   selector: 'app-trabajo-diario',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './trabajodiario.component.html',
   styleUrls: ['./trabajodiario.component.css']
 })
@@ -51,8 +51,7 @@ export class TrabajodiarioComponent implements OnInit {
 
   // Usuario dinámico
   const user = this.auth.getUser();
-  this.usuario = user ? user.username : 'invitado';
-
+this.usuario = user ? user.role : 'invitado';
  // URL base
 const baseUrl = getUrl();
 
@@ -68,15 +67,24 @@ ngOnInit() {
   this.cargarTrabajos(); // carga automáticamente el día de hoy
 }
 
+  private getToken(): string | null {
+  if (typeof window !== 'undefined' && window.localStorage && typeof window.localStorage.getItem === 'function') {
+      const token = localStorage.getItem('accessToken');
+      console.log('Token desde localStorage en client:', token);
+      return token;
+    }
+    return null;
+  }
+
 cargarTrabajos() {
   this.http.get<any[]>(this.urlPartidos).subscribe({
     next: (data) => {
       let partidosFiltrados = data;
 
       // ✅ Primero: filtrar por usuario
-      if (this.usuario === 'vic') {
+      if (this.usuario === 'pro') {
         partidosFiltrados = partidosFiltrados.filter(p => [43, 39].includes(p.torneoId));
-      } else if (this.usuario === 'zon') {
+      } else if (this.usuario === 'ed') {
         partidosFiltrados = partidosFiltrados.filter(p => ![43, 39].includes(p.torneoId));
       }
 console.log('Partidos partidosFiltrados:', partidosFiltrados);
@@ -130,10 +138,14 @@ guardarGoles(partido: Partido) {
 
 
 
-  this.http.put(`${this.urlPartidos}/${partido.id}`, payload).subscribe({
-    next: () => console.log('Partido actualizado en servidor ✅'),
-    error: (err) => console.error('Error al guardar en servidor:', err)
-  });
+ const token = this.getToken();
+
+   const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
+
+    this.http.put(`${this.urlPartidos}/${partido.id}`, payload, { headers }).subscribe({
+      next: () => console.log('Partido actualizado en servidor ✅'),
+      error: (err) => console.error('Error al guardar en servidor:', err)
+    });
 }
 
   cambiarDia(event: Event) {
@@ -195,10 +207,14 @@ accion(tipo: string, partido: Partido) {
   // 🔹 Enviar al servidor
 
 
-  this.http.post(this.urlPartidos, payload).subscribe({
-    next: () => alert('Datos guardados en servidor ✅'),
-    error: (err) => console.error('Error al guardar en servidor:', err)
-  });
+const token = this.getToken();
+
+   const headers = token ? new HttpHeaders({ Authorization: `Bearer ${ token}` }) : undefined;
+
+    this.http.post(this.urlPartidos, payload, { headers  }).subscribe({
+      next: () => alert('Datos guardados en servidor ✅'),
+      error: (err) => console.error('Error al guardar en servidor:', err)
+    });
 }
 
   descargarJSON() {

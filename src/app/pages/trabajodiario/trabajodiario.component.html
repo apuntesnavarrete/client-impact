@@ -1,13 +1,7 @@
   <!-- logout.component.html -->
 <button (click)="logout()">Cerrar sesión</button>
   
-  <div *ngIf="auth.getUser()?.username === 'vic123'">
-      Bienvenido administrador {{ auth.getUser()?.username }}
-    </div>
 
-    <div *ngIf="auth.getUser()?.username === 'zon'">
-      Bienvenido jugador {{ auth.getUser()?.username }}
-    </div>
 
 <h2>Trabajo del día: {{ diaSeleccionado | titlecase }}</h2>
 

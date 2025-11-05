@@ -1,33 +1,43 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private loggedIn = false;
-  private currentUser: { username: string; role: string } | null = null;
+  private currentUser: { role: string } | null = null;
 
-  constructor() {
-    // Al iniciar la app, revisa si hay usuario en localStorage
-    const userData = localStorage.getItem('currentUser');
-    if (userData) {
-      this.currentUser = JSON.parse(userData);
-      this.loggedIn = true;
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+    if (isPlatformBrowser(this.platformId)) {
+      const role = localStorage.getItem('role');
+      if (role) {
+        this.currentUser = { role };
+      }
     }
   }
 
-  login(user: { username: string; passwordHash: string; role: string }) {
-    this.loggedIn = true;
-    this.currentUser = { username: user.username, role: user.role };
-    localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+  loginBackend(data: { accessToken: string; refreshToken: string; role: string }) {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      localStorage.setItem('role', data.role);
+    }
+    this.currentUser = { role: data.role };
   }
 
   logout() {
-    this.loggedIn = false;
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('role');
+    }
     this.currentUser = null;
-    localStorage.removeItem('currentUser');
   }
 
-  isLoggedIn() {
-    return this.loggedIn;
+  isLoggedIn(): boolean {
+    if (isPlatformBrowser(this.platformId)) {
+      return !!localStorage.getItem('accessToken');
+    } else {
+      return false;
+    }
   }
 
   getUser() {

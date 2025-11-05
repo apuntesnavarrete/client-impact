@@ -1,13 +1,17 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { appConfig } from './app/app.config';
+import { logInterceptor } from './app/interceptors/token.interceptor';
 
 bootstrapApplication(AppComponent, {
   ...appConfig,
   providers: [
     ...(appConfig.providers || []),
-    provideHttpClient() // <- habilita HttpClient en toda la app
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([logInterceptor]) // 👈 Se agrega aquí
+    )
   ]
 })
-.catch((err) => console.error(err));
+.catch(err => console.error(err));
