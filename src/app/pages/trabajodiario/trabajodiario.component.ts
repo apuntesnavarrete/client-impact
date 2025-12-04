@@ -76,9 +76,9 @@ cargarTrabajos() {
 
       // ✅ Primero: filtrar por usuario
       if (this.usuario === 'pro') {
-        partidosFiltrados = partidosFiltrados.filter(p => [43, 39].includes(p.torneoId));
+        partidosFiltrados = partidosFiltrados.filter(p => [43, 39,47].includes(p.torneoId));
       } else if (this.usuario === 'ed') {
-        partidosFiltrados = partidosFiltrados.filter(p => ![43, 39].includes(p.torneoId));
+        partidosFiltrados = partidosFiltrados.filter(p => ![43, 39,47].includes(p.torneoId));
       }
 console.log('Partidos partidosFiltrados:', partidosFiltrados);
       // ✅ Segundo: filtrar por día

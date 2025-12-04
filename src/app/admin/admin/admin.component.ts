@@ -55,7 +55,9 @@ plantelesTemporalesJSON: string = ''; // ← para mostrar los temporales
     { id: 41, nombre: "ED-LIBRE-25A" },
     { id: 40, nombre: "ED-LIBRE_SABATINA-25C" },
     { id: 38, nombre: "ED-SUB23-25C" },
-    { id: 28, nombre: "ED-FEMENIL_DOMINICAL-25A" }
+    { id: 45, nombre: "ED-FEMENIL_DOMINICAL-25A" },
+    { id: 47, nombre: "PRO-LIBRE_PLATINO-25I" },
+
   ];
 
   selectedTournamentId = 43; // valor inicial
