@@ -57,6 +57,8 @@ plantelesTemporalesJSON: string = ''; // ← para mostrar los temporales
     { id: 38, nombre: "ED-SUB23-25C" },
     { id: 45, nombre: "ED-FEMENIL_DOMINICAL-25A" },
     { id: 47, nombre: "PRO-LIBRE_PLATINO-25I" },
+    { id: 49, nombre: "SPARTAQ-FEMENIL-26A" },
+    { id: 48, nombre: "LAF-MIXTA-26A" },
 
   ];
 

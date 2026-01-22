@@ -73,15 +73,22 @@ cargarTrabajos() {
   this.http.get<any[]>(this.urlPartidos).subscribe({
     next: (data) => {
       let partidosFiltrados = data;
-
+console.log('usuario:', this.usuario);
+ if (this.usuario === 'superadmin') {
+        partidosFiltrados = partidosFiltrados.filter(p => [48].includes(p.torneoId));
+      }
       // ✅ Primero: filtrar por usuario
       if (this.usuario === 'pro') {
         partidosFiltrados = partidosFiltrados.filter(p => [43, 39,47].includes(p.torneoId));
       } else if (this.usuario === 'ed') {
         partidosFiltrados = partidosFiltrados.filter(p => ![43, 39,47].includes(p.torneoId));
       }
-console.log('Partidos partidosFiltrados:', partidosFiltrados);
-      // ✅ Segundo: filtrar por día
+      else if (this.usuario === 'pipo') {
+        partidosFiltrados = partidosFiltrados.filter(p => [43, 39,47].includes(p.torneoId));
+        console.log('Partidos partidosFiltrados:', partidosFiltrados);
+console.log('usuario:', this.usuario);
+
+      }
       partidosFiltrados = partidosFiltrados.filter(p => p.dia === this.diaSeleccionado);
 
       // ✅ Finalmente, preparar los datos
